@@ -16,12 +16,12 @@ extern "C" {
 
 	A playing card from a standard 52-card deck.
 
-	.. c:member:: unsigned short rank
+	.. c:member:: ``unsigned short rank``
 
 		The rank of the card. 1 for ace, 11 for jack, 12 for queen, and 13
 		for king.
 
-	.. c:member:: char suit
+	.. c:member:: ``char suit``
 
 		The suit of the card. 'c' for clubs, 'd' for diamonds, 'h' for
 		hearts, and 's' for spades.
