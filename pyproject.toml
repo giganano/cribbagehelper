@@ -1,0 +1,44 @@
+# This file is part of the TrackStar package.
+# Copyright (C) 2026 James W. Johnson (giganano9@gmail.com)
+# License: MIT License. See LICENSE under top-level directory
+# at: https://github.com/giganano/cribbagehelper.git
+
+[build-system]
+requires = ["setuptools >= 18.0", "Cython >= 3.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cribbagehelper"
+version = "0.0.0.dev0"
+requires-python = ">=3.10"
+readme = "README.md"
+authors = [{name = "James W. Johnson", email = "giganano9@gmail.com"}]
+maintainers = [{name = "James W. Johnson", email = "giganano9@gmail.com"}]
+license = {file = "LICENSE"}
+description = "Statistical recommendations for cribbage"
+classifiers = [
+	"Development Status :: 1 - Planning",
+	"License :: OSI Approved :: MIT License",
+	"Natural Language :: English",
+	"Operating System :: MacOS",
+	"Operating System :: MacOS :: MacOS X",
+	"Operating System :: POSIX",
+	"Operating System :: POSIX :: Linux",
+	"Operating System :: Unix",
+	"Programming Language :: C",
+	"Programming Language :: Cython",
+	"Programming Language :: Python",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
+	"Programming Language :: Python :: 3.14",
+	"Programming Language :: Python :: 3 :: Only",
+	"Programming Language :: Python :: Implementation :: CPython",
+]
+
+[project.urls]
+Repository = "https://github.com/giganano/cribbagehelper"
+Issues = "https://github.com/giganano/cribbagehelper/issues"
+
