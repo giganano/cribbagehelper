@@ -41,7 +41,10 @@ cdef class card:
 		self.c[0].suit = <char> ord(suit)
 
 	def __dealloc__(self):
-		free(self.c)
+		if self.c is not NULL:
+			free(self.c)
+			self.c = NULL
+		else: pass
 
 	def __repr__(self):
 		rep = "<cribbagehelper.card: "
