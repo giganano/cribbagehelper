@@ -17,5 +17,14 @@ if __name__ == "__main__":
 		"cribbagehelper.core.card.card",
 		["cribbagehelper/core/card/card.pyx"],
 		include_dirs = ["cribbagehelper/core/card/src"]
-		)]
+		),
+		Extension(
+			"cribbagehelper.core.hand.hand",
+			["cribbagehelper/core/hand/hand.pyx",
+			"cribbagehelper/core/hand/hand.c"],
+			include_dirs = [
+				"cribbagehelper/core/hand/src",
+				"cribbagehelper/core/card/src"],
+			)
+	]
 	setup(ext_modules = extensions)
