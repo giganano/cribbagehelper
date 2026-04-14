@@ -3,5 +3,5 @@
 # License: MIT License. See LICENSE under top-level directory
 # at https://github.com/giganano/cribbagehelper.git
 
-from .card cimport *
-from .src cimport *
+from .card cimport Card
+from .src cimport CARD

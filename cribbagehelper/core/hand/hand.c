@@ -9,12 +9,19 @@
         ],
         "include_dirs": [
             "cribbagehelper/core/hand/src",
-            "cribbagehelper/core/card/src"
+            "cribbagehelper/core/card/src",
+            "cribbagehelper/scorehand/src"
         ],
         "name": "cribbagehelper.core.hand.hand",
         "sources": [
             "cribbagehelper/core/hand/hand.pyx",
-            "cribbagehelper/core/hand/hand.c"
+            "cribbagehelper/core/hand/src/hand.c",
+            "cribbagehelper/scorehand/src/fifteens.c",
+            "cribbagehelper/scorehand/src/flush.c",
+            "cribbagehelper/scorehand/src/knobs.c",
+            "cribbagehelper/scorehand/src/pairs.c",
+            "cribbagehelper/scorehand/src/runs.c",
+            "cribbagehelper/scorehand/src/subsets.c"
         ]
     },
     "module_name": "cribbagehelper.core.hand.hand"
@@ -1142,6 +1149,7 @@ static int __Pyx_init_co_variables(void) {
 #include "./hand.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */
@@ -1537,16 +1545,16 @@ static const char* const __pyx_f[] = {
 /* #### Code section: type_declarations ### */
 
 /*--- Type declarations ---*/
-struct __pyx_obj_14cribbagehelper_4core_4card_4card_card;
-struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand;
+struct __pyx_obj_14cribbagehelper_4core_4card_4card_Card;
+struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand;
 
 /* "card.pxd":7
  * 
- * from .src cimport CARD, card_count_value
- * cdef class card:             # <<<<<<<<<<<<<<
+ * from .src cimport CARD
+ * cdef class Card:             # <<<<<<<<<<<<<<
  * 	cdef CARD *c
 */
-struct __pyx_obj_14cribbagehelper_4core_4card_4card_card {
+struct __pyx_obj_14cribbagehelper_4core_4card_4card_Card {
   PyObject_HEAD
   CARD *c;
 };
@@ -1554,12 +1562,12 @@ struct __pyx_obj_14cribbagehelper_4core_4card_4card_card {
 
 /* "cribbagehelper/core/hand/hand.pxd":7
  * 
- * from .src cimport HAND, setup_hand, free_hand
- * cdef class hand:             # <<<<<<<<<<<<<<
+ * from .src cimport HAND, setupHand, freeHand
+ * cdef class Hand:             # <<<<<<<<<<<<<<
  * 	cdef HAND *h
  * 
 */
-struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand {
+struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand {
   PyObject_HEAD
   HAND *h;
 };
@@ -1840,11 +1848,6 @@ static CYTHON_INLINE int __Pyx_ParseKeywords(
 static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
     Py_ssize_t num_min, Py_ssize_t num_max, Py_ssize_t num_found);
 
-/* PyRange_Check.proto */
-#if CYTHON_COMPILING_IN_PYPY && !defined(PyRange_Check)
-  #define PyRange_Check(obj)  __Pyx_TypeCheck((obj), &PyRange_Type)
-#endif
-
 /* GetItemInt.proto */
 #define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck, has_gil, unsafe_shared)\
     (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
@@ -1867,101 +1870,21 @@ static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
 static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
                                                      int is_list, int wraparound, int boundscheck, int unsafe_shared);
 
-/* PyErrExceptionMatches.proto (used by PyObjectGetAttrStrNoError) */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_PyErr_ExceptionMatches(err) __Pyx_PyErr_ExceptionMatchesInState(__pyx_tstate, err)
-static CYTHON_INLINE int __Pyx_PyErr_ExceptionMatchesInState(PyThreadState* tstate, PyObject* err);
-#else
-#define __Pyx_PyErr_ExceptionMatches(err)  PyErr_ExceptionMatches(err)
-#endif
+/* UnicodeAsUCS4.proto (used by object_ord) */
+static CYTHON_INLINE Py_UCS4 __Pyx_PyUnicode_AsPy_UCS4(PyObject*);
 
-/* PyThreadStateGet.proto (used by PyErrFetchRestore) */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_PyThreadState_declare  PyThreadState *__pyx_tstate;
-#define __Pyx_PyThreadState_assign  __pyx_tstate = __Pyx_PyThreadState_Current;
-#if PY_VERSION_HEX >= 0x030C00A6
-#define __Pyx_PyErr_Occurred()  (__pyx_tstate->current_exception != NULL)
-#define __Pyx_PyErr_CurrentExceptionType()  (__pyx_tstate->current_exception ? (PyObject*) Py_TYPE(__pyx_tstate->current_exception) : (PyObject*) NULL)
-#else
-#define __Pyx_PyErr_Occurred()  (__pyx_tstate->curexc_type != NULL)
-#define __Pyx_PyErr_CurrentExceptionType()  (__pyx_tstate->curexc_type)
-#endif
-#else
-#define __Pyx_PyThreadState_declare
-#define __Pyx_PyThreadState_assign
-#define __Pyx_PyErr_Occurred()  (PyErr_Occurred() != NULL)
-#define __Pyx_PyErr_CurrentExceptionType()  PyErr_Occurred()
-#endif
-
-/* PyErrFetchRestore.proto (used by PyObjectGetAttrStrNoError) */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_PyErr_Clear() __Pyx_ErrRestore(NULL, NULL, NULL)
-#define __Pyx_ErrRestoreWithState(type, value, tb)  __Pyx_ErrRestoreInState(PyThreadState_GET(), type, value, tb)
-#define __Pyx_ErrFetchWithState(type, value, tb)    __Pyx_ErrFetchInState(PyThreadState_GET(), type, value, tb)
-#define __Pyx_ErrRestore(type, value, tb)  __Pyx_ErrRestoreInState(__pyx_tstate, type, value, tb)
-#define __Pyx_ErrFetch(type, value, tb)    __Pyx_ErrFetchInState(__pyx_tstate, type, value, tb)
-static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
-static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
-#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX < 0x030C00A6
-#define __Pyx_PyErr_SetNone(exc) (Py_INCREF(exc), __Pyx_ErrRestore((exc), NULL, NULL))
-#else
-#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
-#endif
-#else
-#define __Pyx_PyErr_Clear() PyErr_Clear()
-#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
-#define __Pyx_ErrRestoreWithState(type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetchWithState(type, value, tb)  PyErr_Fetch(type, value, tb)
-#define __Pyx_ErrRestoreInState(tstate, type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetchInState(tstate, type, value, tb)  PyErr_Fetch(type, value, tb)
-#define __Pyx_ErrRestore(type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetch(type, value, tb)  PyErr_Fetch(type, value, tb)
-#endif
-
-/* PyObjectGetAttrStrNoError.proto (used by ObjectGetItem) */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStrNoError(PyObject* obj, PyObject* attr_name);
-
-/* ObjectGetItem.proto */
-#if CYTHON_USE_TYPE_SLOTS
-static CYTHON_INLINE PyObject *__Pyx_PyObject_GetItem(PyObject *obj, PyObject *key);
-#else
-#define __Pyx_PyObject_GetItem(obj, key)  PyObject_GetItem(obj, key)
-#endif
-
-/* GetException.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_GetException(type, value, tb)  __Pyx__GetException(__pyx_tstate, type, value, tb)
-static int __Pyx__GetException(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
-#else
-static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb);
-#endif
-
-/* SwapException.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_ExceptionSwap(type, value, tb)  __Pyx__ExceptionSwap(__pyx_tstate, type, value, tb)
-static CYTHON_INLINE void __Pyx__ExceptionSwap(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
-#else
-static CYTHON_INLINE void __Pyx_ExceptionSwap(PyObject **type, PyObject **value, PyObject **tb);
-#endif
-
-/* GetTopmostException.proto (used by SaveResetException) */
-#if CYTHON_USE_EXC_INFO_STACK && CYTHON_FAST_THREAD_STATE
-static _PyErr_StackItem * __Pyx_PyErr_GetTopmostException(PyThreadState *tstate);
-#endif
-
-/* SaveResetException.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_ExceptionSave(type, value, tb)  __Pyx__ExceptionSave(__pyx_tstate, type, value, tb)
-static CYTHON_INLINE void __Pyx__ExceptionSave(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
-#define __Pyx_ExceptionReset(type, value, tb)  __Pyx__ExceptionReset(__pyx_tstate, type, value, tb)
-static CYTHON_INLINE void __Pyx__ExceptionReset(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
-#else
-#define __Pyx_ExceptionSave(type, value, tb)   PyErr_GetExcInfo(type, value, tb)
-#define __Pyx_ExceptionReset(type, value, tb)  PyErr_SetExcInfo(type, value, tb)
-#endif
+/* object_ord.proto */
+#define __Pyx_PyObject_Ord(c)\
+    (likely(PyUnicode_Check(c)) ? (long)__Pyx_PyUnicode_AsPy_UCS4(c) : __Pyx__PyObject_Ord(c))
+static long __Pyx__PyObject_Ord(PyObject* c);
 
 /* RejectKeywords.export */
 static void __Pyx_RejectKeywords(const char* function_name, PyObject *kwds);
+
+/* PyRange_Check.proto */
+#if CYTHON_COMPILING_IN_PYPY && !defined(PyRange_Check)
+  #define PyRange_Check(obj)  __Pyx_TypeCheck((obj), &PyRange_Type)
+#endif
 
 /* PyObjectFastCallMethod.proto */
 #if CYTHON_VECTORCALL && PY_VERSION_HEX >= 0x03090000
@@ -2005,18 +1928,9 @@ static PyObject *__Pyx_PyObject_FastCallMethod(PyObject *name, PyObject *const *
     ((unlikely((left) == Py_None) || unlikely((right) == Py_None)) ?\
     PyNumber_InPlaceAdd(left, right) : __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_SharedReferenceInPlace(left, right))
 
-/* PyObjectCallNoArg.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func);
-
 /* PyObjectFormatAndDecref.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatSimpleAndDecref(PyObject* s, PyObject* f);
 static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatAndDecref(PyObject* s, PyObject* f);
-
-/* SliceObject.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(
-        PyObject* obj, Py_ssize_t cstart, Py_ssize_t cstop,
-        PyObject** py_start, PyObject** py_stop, PyObject** py_slice,
-        int has_cstart, int has_cstop, int wraparound);
 
 /* JoinPyUnicode.export */
 static PyObject* __Pyx_PyUnicode_Join(PyObject** values, Py_ssize_t value_count, Py_ssize_t result_ulength,
@@ -2024,6 +1938,49 @@ static PyObject* __Pyx_PyUnicode_Join(PyObject** values, Py_ssize_t value_count,
 
 /* PyTypeError_Check.proto */
 #define __Pyx_PyExc_TypeError_Check(obj)  __Pyx_TypeCheck(obj, PyExc_TypeError)
+
+/* PyThreadStateGet.proto (used by PyErrFetchRestore) */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_PyThreadState_declare  PyThreadState *__pyx_tstate;
+#define __Pyx_PyThreadState_assign  __pyx_tstate = __Pyx_PyThreadState_Current;
+#if PY_VERSION_HEX >= 0x030C00A6
+#define __Pyx_PyErr_Occurred()  (__pyx_tstate->current_exception != NULL)
+#define __Pyx_PyErr_CurrentExceptionType()  (__pyx_tstate->current_exception ? (PyObject*) Py_TYPE(__pyx_tstate->current_exception) : (PyObject*) NULL)
+#else
+#define __Pyx_PyErr_Occurred()  (__pyx_tstate->curexc_type != NULL)
+#define __Pyx_PyErr_CurrentExceptionType()  (__pyx_tstate->curexc_type)
+#endif
+#else
+#define __Pyx_PyThreadState_declare
+#define __Pyx_PyThreadState_assign
+#define __Pyx_PyErr_Occurred()  (PyErr_Occurred() != NULL)
+#define __Pyx_PyErr_CurrentExceptionType()  PyErr_Occurred()
+#endif
+
+/* PyErrFetchRestore.proto (used by RaiseException) */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_PyErr_Clear() __Pyx_ErrRestore(NULL, NULL, NULL)
+#define __Pyx_ErrRestoreWithState(type, value, tb)  __Pyx_ErrRestoreInState(PyThreadState_GET(), type, value, tb)
+#define __Pyx_ErrFetchWithState(type, value, tb)    __Pyx_ErrFetchInState(PyThreadState_GET(), type, value, tb)
+#define __Pyx_ErrRestore(type, value, tb)  __Pyx_ErrRestoreInState(__pyx_tstate, type, value, tb)
+#define __Pyx_ErrFetch(type, value, tb)    __Pyx_ErrFetchInState(__pyx_tstate, type, value, tb)
+static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
+static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
+#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX < 0x030C00A6
+#define __Pyx_PyErr_SetNone(exc) (Py_INCREF(exc), __Pyx_ErrRestore((exc), NULL, NULL))
+#else
+#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
+#endif
+#else
+#define __Pyx_PyErr_Clear() PyErr_Clear()
+#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
+#define __Pyx_ErrRestoreWithState(type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetchWithState(type, value, tb)  PyErr_Fetch(type, value, tb)
+#define __Pyx_ErrRestoreInState(tstate, type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetchInState(tstate, type, value, tb)  PyErr_Fetch(type, value, tb)
+#define __Pyx_ErrRestore(type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetch(type, value, tb)  PyErr_Fetch(type, value, tb)
+#endif
 
 /* RaiseException.export */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
@@ -2042,6 +1999,9 @@ static int __Pyx__SetItemOnTypeDict(PyTypeObject *tp, PyObject *k, PyObject *v);
 
 /* FixUpExtensionType.proto */
 static CYTHON_INLINE int __Pyx_fix_up_extension_type_from_spec(PyType_Spec *spec, PyTypeObject *type);
+
+/* PyObjectCallNoArg.proto (used by PyObjectCallMethod0) */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func);
 
 /* PyObjectGetMethod.proto (used by PyObjectCallMethod0) */
 #if !(CYTHON_VECTORCALL && (__PYX_LIMITED_VERSION_HEX >= 0x030C0000 || (!CYTHON_COMPILING_IN_LIMITED_API && PY_VERSION_HEX >= 0x03090000)))
@@ -2062,6 +2022,17 @@ CYTHON_UNUSED static int __Pyx_PyType_Ready(PyTypeObject *t);
 /* DelItemOnTypeDict.proto (used by SetupReduce) */
 static int __Pyx__DelItemOnTypeDict(PyTypeObject *tp, PyObject *k);
 #define __Pyx_DelItemOnTypeDict(tp, k) __Pyx__DelItemOnTypeDict((PyTypeObject*)tp, k)
+
+/* PyErrExceptionMatches.proto (used by PyObjectGetAttrStrNoError) */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_PyErr_ExceptionMatches(err) __Pyx_PyErr_ExceptionMatchesInState(__pyx_tstate, err)
+static CYTHON_INLINE int __Pyx_PyErr_ExceptionMatchesInState(PyThreadState* tstate, PyObject* err);
+#else
+#define __Pyx_PyErr_ExceptionMatches(err)  PyErr_ExceptionMatches(err)
+#endif
+
+/* PyObjectGetAttrStrNoError.proto (used by SetupReduce) */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStrNoError(PyObject* obj, PyObject* attr_name);
 
 /* SetupReduce.proto */
 static int __Pyx_setup_reduce(PyObject* type_obj);
@@ -2084,6 +2055,9 @@ enum __Pyx_ImportType_CheckSize_3_2_4 {
 };
 static PyTypeObject *__Pyx_ImportType_3_2_4(PyObject* module, const char *module_name, const char *class_name, size_t size, size_t alignment, enum __Pyx_ImportType_CheckSize_3_2_4 check_size);
 #endif
+
+/* ListPack.proto */
+static PyObject *__Pyx_PyList_Pack(Py_ssize_t n, ...);
 
 /* dict_setdefault.proto (used by FetchCommonType) */
 static CYTHON_INLINE PyObject *__Pyx_PyDict_SetDefault(PyObject *d, PyObject *key, PyObject *default_value);
@@ -2283,13 +2257,7 @@ static void __Pyx_AddTraceback(const char *funcname, int c_line,
 #endif
 
 /* CIntFromPy.proto */
-static CYTHON_INLINE size_t __Pyx_PyLong_As_size_t(PyObject *);
-
-/* CIntFromPy.proto */
 static CYTHON_INLINE unsigned short __Pyx_PyLong_As_unsigned_short(PyObject *);
-
-/* CIntFromPy.proto */
-static CYTHON_INLINE char __Pyx_PyLong_As_char(PyObject *);
 
 /* PyObjectVectorCallKwBuilder.proto (used by CIntToPy) */
 CYTHON_UNUSED static int __Pyx_VectorcallBuilder_AddArg_Check(PyObject *key, PyObject *value, PyObject *builder, PyObject **args, int n);
@@ -2310,7 +2278,7 @@ static int __Pyx_VectorcallBuilder_AddArgStr(const char *key, PyObject *value, P
 #endif
 
 /* CIntToPy.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyLong_From_long(long value);
+static CYTHON_INLINE PyObject* __Pyx_PyLong_From_unsigned_int(unsigned int value);
 
 /* FormatTypeName.proto */
 #if CYTHON_COMPILING_IN_LIMITED_API
@@ -2328,6 +2296,9 @@ typedef const char *__Pyx_TypeName;
 #define __Pyx_PyType_GetFullyQualifiedName(tp) ((tp)->tp_name)
 #define __Pyx_DECREF_TypeName(obj)
 #endif
+
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyLong_From_long(long value);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE long __Pyx_PyLong_As_long(PyObject *);
@@ -2436,6 +2407,8 @@ static int __Pyx_State_RemoveModule(void*);
 
 /* Module declarations from "libc.stdlib" */
 
+/* Module declarations from "libc.stdio" */
+
 /* Module declarations from "cribbagehelper.core.hand.hand" */
 /* #### Code section: typeinfo ### */
 /* #### Code section: before_global_var ### */
@@ -2447,17 +2420,17 @@ int __pyx_module_is_main_cribbagehelper__core__hand__hand = 0;
 /* #### Code section: global_var ### */
 /* #### Code section: string_decls ### */
 /* #### Code section: decls ### */
-static int __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand___cinit__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self, PyObject *__pyx_v_ranks, PyObject *__pyx_v_suits); /* proto */
-static int __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_2__init__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_ranks, CYTHON_UNUSED PyObject *__pyx_v_suits); /* proto */
-static void __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_4__dealloc__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_6__enter__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_8__exit__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self, PyObject *__pyx_v_exc_type, CYTHON_UNUSED PyObject *__pyx_v_exc_value, CYTHON_UNUSED PyObject *__pyx_v_exc_tb); /* proto */
-static Py_ssize_t __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_10__len__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_14__getitem__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self, PyObject *__pyx_v_index); /* proto */
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_16__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_18__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
-static PyObject *__pyx_tp_new_14cribbagehelper_4core_4hand_4hand_hand(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static int __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand___cinit__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self, PyObject *__pyx_v_ranks, CYTHON_UNUSED PyObject *__pyx_v_suits); /* proto */
+static int __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_2__init__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self, PyObject *__pyx_v_ranks, PyObject *__pyx_v_suits); /* proto */
+static void __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_4__dealloc__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_6__enter__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_8__exit__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self, PyObject *__pyx_v_exc_type, CYTHON_UNUSED PyObject *__pyx_v_exc_value, CYTHON_UNUSED PyObject *__pyx_v_exc_tb); /* proto */
+static Py_ssize_t __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_10__len__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_12__repr__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_14__getitem__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self, PyObject *__pyx_v_index); /* proto */
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_16__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_18__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
+static PyObject *__pyx_tp_new_14cribbagehelper_4core_4hand_4hand_Hand(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 /* #### Code section: late_includes ### */
 /* #### Code section: module_state ### */
 /* SmallCodeConfig */
@@ -2478,17 +2451,14 @@ typedef struct {
   PyObject *__pyx_empty_tuple;
   PyObject *__pyx_empty_bytes;
   PyObject *__pyx_empty_unicode;
-  PyTypeObject *__pyx_ptype_14cribbagehelper_4core_4card_4card_card;
-  PyObject *__pyx_type_14cribbagehelper_4core_4hand_4hand_hand;
-  PyTypeObject *__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand;
+  PyTypeObject *__pyx_ptype_14cribbagehelper_4core_4card_4card_Card;
+  PyObject *__pyx_type_14cribbagehelper_4core_4hand_4hand_Hand;
+  PyTypeObject *__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand;
   __Pyx_CachedCFunction __pyx_umethod_PyDict_Type_items;
   __Pyx_CachedCFunction __pyx_umethod_PyDict_Type_pop;
   __Pyx_CachedCFunction __pyx_umethod_PyDict_Type_values;
-  PyObject *__pyx_slice[1];
-  PyObject *__pyx_tuple[1];
   PyObject *__pyx_codeobj_tab[4];
-  PyObject *__pyx_string_tab[57];
-  PyObject *__pyx_number_tab[2];
+  PyObject *__pyx_string_tab[56];
 /* #### Code section: module_state_contents ### */
 /* CommonTypesMetaclass.module_state_decls */
 PyTypeObject *__pyx_CommonTypesMetaclassType;
@@ -2541,24 +2511,24 @@ static __pyx_mstatetype * const __pyx_mstate_global = &__pyx_mstate_global_stati
 #define __pyx_kp_u_no_default___reduce___due_to_non __pyx_string_tab[9]
 #define __pyx_kp_u_of __pyx_string_tab[10]
 #define __pyx_kp_u_stringsource __pyx_string_tab[11]
-#define __pyx_n_u_Pyx_PyDict_NextRef __pyx_string_tab[12]
-#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[13]
-#define __pyx_n_u_class_getitem __pyx_string_tab[14]
-#define __pyx_n_u_cline_in_traceback __pyx_string_tab[15]
-#define __pyx_n_u_cribbagehelper_core_hand_hand __pyx_string_tab[16]
-#define __pyx_n_u_enter __pyx_string_tab[17]
-#define __pyx_n_u_exc_tb __pyx_string_tab[18]
-#define __pyx_n_u_exc_type __pyx_string_tab[19]
-#define __pyx_n_u_exc_value __pyx_string_tab[20]
-#define __pyx_n_u_exit __pyx_string_tab[21]
-#define __pyx_n_u_func __pyx_string_tab[22]
-#define __pyx_n_u_getitem __pyx_string_tab[23]
-#define __pyx_n_u_getstate __pyx_string_tab[24]
-#define __pyx_n_u_hand __pyx_string_tab[25]
-#define __pyx_n_u_hand___enter __pyx_string_tab[26]
-#define __pyx_n_u_hand___exit __pyx_string_tab[27]
-#define __pyx_n_u_hand___reduce_cython __pyx_string_tab[28]
-#define __pyx_n_u_hand___setstate_cython __pyx_string_tab[29]
+#define __pyx_n_u_Hand __pyx_string_tab[12]
+#define __pyx_n_u_Hand___enter __pyx_string_tab[13]
+#define __pyx_n_u_Hand___exit __pyx_string_tab[14]
+#define __pyx_n_u_Hand___reduce_cython __pyx_string_tab[15]
+#define __pyx_n_u_Hand___setstate_cython __pyx_string_tab[16]
+#define __pyx_n_u_Pyx_PyDict_NextRef __pyx_string_tab[17]
+#define __pyx_n_u_all __pyx_string_tab[18]
+#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[19]
+#define __pyx_n_u_cline_in_traceback __pyx_string_tab[20]
+#define __pyx_n_u_cribbagehelper_core_hand_hand __pyx_string_tab[21]
+#define __pyx_n_u_enter __pyx_string_tab[22]
+#define __pyx_n_u_exc_tb __pyx_string_tab[23]
+#define __pyx_n_u_exc_type __pyx_string_tab[24]
+#define __pyx_n_u_exc_value __pyx_string_tab[25]
+#define __pyx_n_u_exit __pyx_string_tab[26]
+#define __pyx_n_u_func __pyx_string_tab[27]
+#define __pyx_n_u_getitem __pyx_string_tab[28]
+#define __pyx_n_u_getstate __pyx_string_tab[29]
 #define __pyx_n_u_is_coroutine __pyx_string_tab[30]
 #define __pyx_n_u_items __pyx_string_tab[31]
 #define __pyx_n_u_len __pyx_string_tab[32]
@@ -2568,26 +2538,23 @@ static __pyx_mstatetype * const __pyx_mstate_global = &__pyx_mstate_global_stati
 #define __pyx_n_u_pop __pyx_string_tab[36]
 #define __pyx_n_u_pyx_state __pyx_string_tab[37]
 #define __pyx_n_u_qualname __pyx_string_tab[38]
-#define __pyx_n_u_ranks __pyx_string_tab[39]
-#define __pyx_n_u_reduce __pyx_string_tab[40]
-#define __pyx_n_u_reduce_cython __pyx_string_tab[41]
-#define __pyx_n_u_reduce_ex __pyx_string_tab[42]
-#define __pyx_n_u_repr __pyx_string_tab[43]
-#define __pyx_n_u_s __pyx_string_tab[44]
-#define __pyx_n_u_self __pyx_string_tab[45]
-#define __pyx_n_u_set_name __pyx_string_tab[46]
-#define __pyx_n_u_setdefault __pyx_string_tab[47]
-#define __pyx_n_u_setstate __pyx_string_tab[48]
-#define __pyx_n_u_setstate_cython __pyx_string_tab[49]
-#define __pyx_n_u_split __pyx_string_tab[50]
-#define __pyx_n_u_suits __pyx_string_tab[51]
-#define __pyx_n_u_test __pyx_string_tab[52]
-#define __pyx_n_u_values __pyx_string_tab[53]
-#define __pyx_kp_b_iso88591_Q __pyx_string_tab[54]
-#define __pyx_kp_b_iso88591_Q_2 __pyx_string_tab[55]
-#define __pyx_kp_b_iso88591__4 __pyx_string_tab[56]
-#define __pyx_int_neg_1 __pyx_number_tab[0]
-#define __pyx_int_1 __pyx_number_tab[1]
+#define __pyx_n_u_rank __pyx_string_tab[39]
+#define __pyx_n_u_ranks __pyx_string_tab[40]
+#define __pyx_n_u_reduce __pyx_string_tab[41]
+#define __pyx_n_u_reduce_cython __pyx_string_tab[42]
+#define __pyx_n_u_reduce_ex __pyx_string_tab[43]
+#define __pyx_n_u_self __pyx_string_tab[44]
+#define __pyx_n_u_set_name __pyx_string_tab[45]
+#define __pyx_n_u_setdefault __pyx_string_tab[46]
+#define __pyx_n_u_setstate __pyx_string_tab[47]
+#define __pyx_n_u_setstate_cython __pyx_string_tab[48]
+#define __pyx_n_u_suit __pyx_string_tab[49]
+#define __pyx_n_u_suits __pyx_string_tab[50]
+#define __pyx_n_u_test __pyx_string_tab[51]
+#define __pyx_n_u_values __pyx_string_tab[52]
+#define __pyx_kp_b_iso88591_Q __pyx_string_tab[53]
+#define __pyx_kp_b_iso88591_Q_2 __pyx_string_tab[54]
+#define __pyx_kp_b_iso88591__4 __pyx_string_tab[55]
 /* #### Code section: module_state_clear ### */
 #if CYTHON_USE_MODULE_STATE
 static CYTHON_SMALL_CODE int __pyx_m_clear(PyObject *m) {
@@ -2602,14 +2569,11 @@ static CYTHON_SMALL_CODE int __pyx_m_clear(PyObject *m) {
   #if CYTHON_PEP489_MULTI_PHASE_INIT
   __Pyx_State_RemoveModule(NULL);
   #endif
-  Py_CLEAR(clear_module_state->__pyx_ptype_14cribbagehelper_4core_4card_4card_card);
-  Py_CLEAR(clear_module_state->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand);
-  Py_CLEAR(clear_module_state->__pyx_type_14cribbagehelper_4core_4hand_4hand_hand);
-  for (int i=0; i<1; ++i) { Py_CLEAR(clear_module_state->__pyx_slice[i]); }
-  for (int i=0; i<1; ++i) { Py_CLEAR(clear_module_state->__pyx_tuple[i]); }
+  Py_CLEAR(clear_module_state->__pyx_ptype_14cribbagehelper_4core_4card_4card_Card);
+  Py_CLEAR(clear_module_state->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand);
+  Py_CLEAR(clear_module_state->__pyx_type_14cribbagehelper_4core_4hand_4hand_Hand);
   for (int i=0; i<4; ++i) { Py_CLEAR(clear_module_state->__pyx_codeobj_tab[i]); }
-  for (int i=0; i<57; ++i) { Py_CLEAR(clear_module_state->__pyx_string_tab[i]); }
-  for (int i=0; i<2; ++i) { Py_CLEAR(clear_module_state->__pyx_number_tab[i]); }
+  for (int i=0; i<56; ++i) { Py_CLEAR(clear_module_state->__pyx_string_tab[i]); }
 /* #### Code section: module_state_clear_contents ### */
 /* CommonTypesMetaclass.module_state_clear */
 Py_CLEAR(clear_module_state->__pyx_CommonTypesMetaclassType);
@@ -2632,14 +2596,11 @@ static CYTHON_SMALL_CODE int __pyx_m_traverse(PyObject *m, visitproc visit, void
   __Pyx_VISIT_CONST(traverse_module_state->__pyx_empty_tuple);
   __Pyx_VISIT_CONST(traverse_module_state->__pyx_empty_bytes);
   __Pyx_VISIT_CONST(traverse_module_state->__pyx_empty_unicode);
-  Py_VISIT(traverse_module_state->__pyx_ptype_14cribbagehelper_4core_4card_4card_card);
-  Py_VISIT(traverse_module_state->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand);
-  Py_VISIT(traverse_module_state->__pyx_type_14cribbagehelper_4core_4hand_4hand_hand);
-  for (int i=0; i<1; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_slice[i]); }
-  for (int i=0; i<1; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_tuple[i]); }
+  Py_VISIT(traverse_module_state->__pyx_ptype_14cribbagehelper_4core_4card_4card_Card);
+  Py_VISIT(traverse_module_state->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand);
+  Py_VISIT(traverse_module_state->__pyx_type_14cribbagehelper_4core_4hand_4hand_Hand);
   for (int i=0; i<4; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_codeobj_tab[i]); }
-  for (int i=0; i<57; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_string_tab[i]); }
-  for (int i=0; i<2; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_number_tab[i]); }
+  for (int i=0; i<56; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_string_tab[i]); }
 /* #### Code section: module_state_traverse_contents ### */
 /* CommonTypesMetaclass.module_state_traverse */
 Py_VISIT(traverse_module_state->__pyx_CommonTypesMetaclassType);
@@ -2653,19 +2614,19 @@ return 0;
 #endif
 /* #### Code section: module_code ### */
 
-/* "cribbagehelper/core/hand/hand.pyx":35
+/* "cribbagehelper/core/hand/hand.pyx":37
  * 	"""
  * 
  * 	def __cinit__(self, ranks, suits):             # <<<<<<<<<<<<<<
  * 		# TODO: error handling
- * 		n = len(ranks)
+ * 		self.h = setupHand(<unsigned short> len(ranks))
 */
 
 /* Python wrapper */
-static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_ranks = 0;
-  PyObject *__pyx_v_suits = 0;
+  CYTHON_UNUSED PyObject *__pyx_v_suits = 0;
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
   PyObject* values[2] = {0,0};
@@ -2684,50 +2645,50 @@ static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_1__cinit__(PyObject
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_ranks,&__pyx_mstate_global->__pyx_n_u_suits,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_VARARGS(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 35, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 37, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  2:
         values[1] = __Pyx_ArgRef_VARARGS(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 35, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 37, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_VARARGS(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 35, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 37, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "__cinit__", 0) < (0)) __PYX_ERR(0, 35, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "__cinit__", 0) < (0)) __PYX_ERR(0, 37, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 2; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, i); __PYX_ERR(0, 35, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, i); __PYX_ERR(0, 37, __pyx_L3_error) }
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_ArgRef_VARARGS(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 35, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 37, __pyx_L3_error)
       values[1] = __Pyx_ArgRef_VARARGS(__pyx_args, 1);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 35, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 37, __pyx_L3_error)
     }
     __pyx_v_ranks = values[0];
     __pyx_v_suits = values[1];
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 35, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 37, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.hand.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.Hand.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand___cinit__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *)__pyx_v_self), __pyx_v_ranks, __pyx_v_suits);
+  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand___cinit__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *)__pyx_v_self), __pyx_v_ranks, __pyx_v_suits);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -2737,281 +2698,54 @@ static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_1__cinit__(PyObject
   return __pyx_r;
 }
 
-static int __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand___cinit__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self, PyObject *__pyx_v_ranks, PyObject *__pyx_v_suits) {
-  PyObject *__pyx_v_n = NULL;
-  unsigned short *__pyx_v__ranks;
-  char *__pyx_v__suits;
-  PyObject *__pyx_v_i = NULL;
+static int __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand___cinit__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self, PyObject *__pyx_v_ranks, CYTHON_UNUSED PyObject *__pyx_v_suits) {
   int __pyx_r;
-  __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  size_t __pyx_t_4;
-  PyObject *(*__pyx_t_5)(PyObject *);
-  unsigned short __pyx_t_6;
-  char __pyx_t_7;
-  int __pyx_t_8;
-  int __pyx_t_9;
-  char const *__pyx_t_10;
-  PyObject *__pyx_t_11 = NULL;
-  PyObject *__pyx_t_12 = NULL;
-  PyObject *__pyx_t_13 = NULL;
-  PyObject *__pyx_t_14 = NULL;
-  PyObject *__pyx_t_15 = NULL;
-  PyObject *__pyx_t_16 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "cribbagehelper/core/hand/hand.pyx":37
+  /* "cribbagehelper/core/hand/hand.pyx":39
  * 	def __cinit__(self, ranks, suits):
  * 		# TODO: error handling
- * 		n = len(ranks)             # <<<<<<<<<<<<<<
- * 		cdef unsigned short *_ranks = <unsigned short *> malloc (n * sizeof(
- * 			unsigned short))
-*/
-  __pyx_t_1 = PyObject_Length(__pyx_v_ranks); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 37, __pyx_L1_error)
-  __pyx_t_2 = PyLong_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 37, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_v_n = __pyx_t_2;
-  __pyx_t_2 = 0;
-
-  /* "cribbagehelper/core/hand/hand.pyx":38
- * 		# TODO: error handling
- * 		n = len(ranks)
- * 		cdef unsigned short *_ranks = <unsigned short *> malloc (n * sizeof(             # <<<<<<<<<<<<<<
- * 			unsigned short))
- * 		cdef char *_suits = <char *> malloc (n * sizeof(char))
-*/
-  __pyx_t_2 = __Pyx_PyLong_FromSize_t((sizeof(unsigned short))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 38, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyNumber_Multiply(__pyx_v_n, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __Pyx_PyLong_As_size_t(__pyx_t_3); if (unlikely((__pyx_t_4 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v__ranks = ((unsigned short *)malloc(__pyx_t_4));
-
-  /* "cribbagehelper/core/hand/hand.pyx":40
- * 		cdef unsigned short *_ranks = <unsigned short *> malloc (n * sizeof(
- * 			unsigned short))
- * 		cdef char *_suits = <char *> malloc (n * sizeof(char))             # <<<<<<<<<<<<<<
- * 		for i in range(n):
- * 			_ranks[i] = ranks[i]
-*/
-  __pyx_t_3 = __Pyx_PyLong_FromSize_t((sizeof(char))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PyNumber_Multiply(__pyx_v_n, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 40, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_4 = __Pyx_PyLong_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_4 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 40, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_v__suits = ((char *)malloc(__pyx_t_4));
-
-  /* "cribbagehelper/core/hand/hand.pyx":41
- * 			unsigned short))
- * 		cdef char *_suits = <char *> malloc (n * sizeof(char))
- * 		for i in range(n):             # <<<<<<<<<<<<<<
- * 			_ranks[i] = ranks[i]
- * 			_suits[i] = suits[i]
-*/
-  __pyx_t_3 = NULL;
-  __pyx_t_4 = 1;
-  {
-    PyObject *__pyx_callargs[2] = {__pyx_t_3, __pyx_v_n};
-    __pyx_t_2 = __Pyx_PyObject_FastCall((PyObject*)(&PyRange_Type), __pyx_callargs+__pyx_t_4, (2-__pyx_t_4) | (__pyx_t_4*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
-    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 41, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-  }
-  __pyx_t_3 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 41, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = (CYTHON_COMPILING_IN_LIMITED_API) ? PyIter_Next : __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 41, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  for (;;) {
-    {
-      __pyx_t_2 = __pyx_t_5(__pyx_t_3);
-      if (unlikely(!__pyx_t_2)) {
-        PyObject* exc_type = PyErr_Occurred();
-        if (exc_type) {
-          if (unlikely(!__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) __PYX_ERR(0, 41, __pyx_L1_error)
-          PyErr_Clear();
-        }
-        break;
-      }
-    }
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_2);
-    __pyx_t_2 = 0;
-
-    /* "cribbagehelper/core/hand/hand.pyx":42
- * 		cdef char *_suits = <char *> malloc (n * sizeof(char))
- * 		for i in range(n):
- * 			_ranks[i] = ranks[i]             # <<<<<<<<<<<<<<
- * 			_suits[i] = suits[i]
- * 		try:
-*/
-    __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_v_ranks, __pyx_v_i); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 42, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_6 = __Pyx_PyLong_As_unsigned_short(__pyx_t_2); if (unlikely((__pyx_t_6 == (unsigned short)-1) && PyErr_Occurred())) __PYX_ERR(0, 42, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_1 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_1 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 42, __pyx_L1_error)
-    (__pyx_v__ranks[__pyx_t_1]) = __pyx_t_6;
-
-    /* "cribbagehelper/core/hand/hand.pyx":43
- * 		for i in range(n):
- * 			_ranks[i] = ranks[i]
- * 			_suits[i] = suits[i]             # <<<<<<<<<<<<<<
- * 		try:
- * 			self.h = setup_hand(<unsigned short> n, _ranks, _suits)
-*/
-    __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_v_suits, __pyx_v_i); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_7 = __Pyx_PyLong_As_char(__pyx_t_2); if (unlikely((__pyx_t_7 == (char)-1) && PyErr_Occurred())) __PYX_ERR(0, 43, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_1 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_1 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 43, __pyx_L1_error)
-    (__pyx_v__suits[__pyx_t_1]) = __pyx_t_7;
-
-    /* "cribbagehelper/core/hand/hand.pyx":41
- * 			unsigned short))
- * 		cdef char *_suits = <char *> malloc (n * sizeof(char))
- * 		for i in range(n):             # <<<<<<<<<<<<<<
- * 			_ranks[i] = ranks[i]
- * 			_suits[i] = suits[i]
-*/
-  }
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-  /* "cribbagehelper/core/hand/hand.pyx":44
- * 			_ranks[i] = ranks[i]
- * 			_suits[i] = suits[i]
- * 		try:             # <<<<<<<<<<<<<<
- * 			self.h = setup_hand(<unsigned short> n, _ranks, _suits)
- * 		finally:
-*/
-  /*try:*/ {
-
-    /* "cribbagehelper/core/hand/hand.pyx":45
- * 			_suits[i] = suits[i]
- * 		try:
- * 			self.h = setup_hand(<unsigned short> n, _ranks, _suits)             # <<<<<<<<<<<<<<
- * 		finally:
- * 			free(_ranks)
-*/
-    __pyx_t_6 = __Pyx_PyLong_As_unsigned_short(__pyx_v_n); if (unlikely((__pyx_t_6 == (unsigned short)-1) && PyErr_Occurred())) __PYX_ERR(0, 45, __pyx_L7_error)
-    __pyx_v_self->h = setup_hand(((unsigned short)__pyx_t_6), __pyx_v__ranks, __pyx_v__suits);
-  }
-
-  /* "cribbagehelper/core/hand/hand.pyx":47
- * 			self.h = setup_hand(<unsigned short> n, _ranks, _suits)
- * 		finally:
- * 			free(_ranks)             # <<<<<<<<<<<<<<
- * 			free(_suits)
- * 
-*/
-  /*finally:*/ {
-    /*normal exit:*/{
-      free(__pyx_v__ranks);
-
-      /* "cribbagehelper/core/hand/hand.pyx":48
- * 		finally:
- * 			free(_ranks)
- * 			free(_suits)             # <<<<<<<<<<<<<<
+ * 		self.h = setupHand(<unsigned short> len(ranks))             # <<<<<<<<<<<<<<
  * 
  * 	def __init__(self, ranks, suits):
 */
-      free(__pyx_v__suits);
-      goto __pyx_L8;
-    }
-    __pyx_L7_error:;
-    /*exception exit:*/{
-      __Pyx_PyThreadState_declare
-      __Pyx_PyThreadState_assign
-      __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
-      __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-       __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16);
-      if ( unlikely(__Pyx_GetException(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13) < 0)) __Pyx_ErrFetch(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13);
-      __Pyx_XGOTREF(__pyx_t_11);
-      __Pyx_XGOTREF(__pyx_t_12);
-      __Pyx_XGOTREF(__pyx_t_13);
-      __Pyx_XGOTREF(__pyx_t_14);
-      __Pyx_XGOTREF(__pyx_t_15);
-      __Pyx_XGOTREF(__pyx_t_16);
-      __pyx_t_8 = __pyx_lineno; __pyx_t_9 = __pyx_clineno; __pyx_t_10 = __pyx_filename;
-      {
+  __pyx_t_1 = PyObject_Length(__pyx_v_ranks); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_v_self->h = setupHand(((unsigned short)__pyx_t_1));
 
-        /* "cribbagehelper/core/hand/hand.pyx":47
- * 			self.h = setup_hand(<unsigned short> n, _ranks, _suits)
- * 		finally:
- * 			free(_ranks)             # <<<<<<<<<<<<<<
- * 			free(_suits)
- * 
-*/
-        free(__pyx_v__ranks);
-
-        /* "cribbagehelper/core/hand/hand.pyx":48
- * 		finally:
- * 			free(_ranks)
- * 			free(_suits)             # <<<<<<<<<<<<<<
- * 
- * 	def __init__(self, ranks, suits):
-*/
-        free(__pyx_v__suits);
-      }
-      __Pyx_XGIVEREF(__pyx_t_14);
-      __Pyx_XGIVEREF(__pyx_t_15);
-      __Pyx_XGIVEREF(__pyx_t_16);
-      __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_15, __pyx_t_16);
-      __Pyx_XGIVEREF(__pyx_t_11);
-      __Pyx_XGIVEREF(__pyx_t_12);
-      __Pyx_XGIVEREF(__pyx_t_13);
-      __Pyx_ErrRestore(__pyx_t_11, __pyx_t_12, __pyx_t_13);
-      __pyx_t_11 = 0; __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0;
-      __pyx_lineno = __pyx_t_8; __pyx_clineno = __pyx_t_9; __pyx_filename = __pyx_t_10;
-      goto __pyx_L1_error;
-    }
-    __pyx_L8:;
-  }
-
-  /* "cribbagehelper/core/hand/hand.pyx":35
+  /* "cribbagehelper/core/hand/hand.pyx":37
  * 	"""
  * 
  * 	def __cinit__(self, ranks, suits):             # <<<<<<<<<<<<<<
  * 		# TODO: error handling
- * 		n = len(ranks)
+ * 		self.h = setupHand(<unsigned short> len(ranks))
 */
 
   /* function exit code */
   __pyx_r = 0;
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.hand.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.Hand.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_n);
-  __Pyx_XDECREF(__pyx_v_i);
-  __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cribbagehelper/core/hand/hand.pyx":50
- * 			free(_suits)
+/* "cribbagehelper/core/hand/hand.pyx":41
+ * 		self.h = setupHand(<unsigned short> len(ranks))
  * 
  * 	def __init__(self, ranks, suits):             # <<<<<<<<<<<<<<
- * 		pass
- * 
+ * 		# TODO: error handling
+ * 		for i in range(len(ranks)):
 */
 
 /* Python wrapper */
-static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_3__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_3__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
-  CYTHON_UNUSED PyObject *__pyx_v_ranks = 0;
-  CYTHON_UNUSED PyObject *__pyx_v_suits = 0;
+static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_3__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_3__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_ranks = 0;
+  PyObject *__pyx_v_suits = 0;
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
   PyObject* values[2] = {0,0};
@@ -3030,50 +2764,50 @@ static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_3__init__(PyObject 
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_ranks,&__pyx_mstate_global->__pyx_n_u_suits,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_VARARGS(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 50, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 41, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  2:
         values[1] = __Pyx_ArgRef_VARARGS(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 50, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 41, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_VARARGS(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 50, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 41, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "__init__", 0) < (0)) __PYX_ERR(0, 50, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "__init__", 0) < (0)) __PYX_ERR(0, 41, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 2; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, i); __PYX_ERR(0, 50, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, i); __PYX_ERR(0, 41, __pyx_L3_error) }
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_ArgRef_VARARGS(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 50, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 41, __pyx_L3_error)
       values[1] = __Pyx_ArgRef_VARARGS(__pyx_args, 1);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 50, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 41, __pyx_L3_error)
     }
     __pyx_v_ranks = values[0];
     __pyx_v_suits = values[1];
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 50, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 41, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.hand.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.Hand.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_2__init__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *)__pyx_v_self), __pyx_v_ranks, __pyx_v_suits);
+  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_2__init__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *)__pyx_v_self), __pyx_v_ranks, __pyx_v_suits);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -3083,59 +2817,125 @@ static int __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_3__init__(PyObject 
   return __pyx_r;
 }
 
-static int __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_2__init__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_ranks, CYTHON_UNUSED PyObject *__pyx_v_suits) {
+static int __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_2__init__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self, PyObject *__pyx_v_ranks, PyObject *__pyx_v_suits) {
+  Py_ssize_t __pyx_v_i;
   int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  Py_ssize_t __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
+  unsigned short __pyx_t_5;
+  long __pyx_t_6;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__init__", 0);
+
+  /* "cribbagehelper/core/hand/hand.pyx":43
+ * 	def __init__(self, ranks, suits):
+ * 		# TODO: error handling
+ * 		for i in range(len(ranks)):             # <<<<<<<<<<<<<<
+ * 			self.h[0].cards[i][0].rank = <unsigned short> ranks[i]
+ * 			self.h[0].cards[i][0].suit = <char> ord(suits[i])
+*/
+  __pyx_t_1 = PyObject_Length(__pyx_v_ranks); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_i = __pyx_t_3;
+
+    /* "cribbagehelper/core/hand/hand.pyx":44
+ * 		# TODO: error handling
+ * 		for i in range(len(ranks)):
+ * 			self.h[0].cards[i][0].rank = <unsigned short> ranks[i]             # <<<<<<<<<<<<<<
+ * 			self.h[0].cards[i][0].suit = <char> ord(suits[i])
+ * 
+*/
+    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_ranks, __pyx_v_i, Py_ssize_t, 1, PyLong_FromSsize_t, 0, 1, 1, 1, __Pyx_ReferenceSharing_FunctionArgument); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 44, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_5 = __Pyx_PyLong_As_unsigned_short(__pyx_t_4); if (unlikely((__pyx_t_5 == (unsigned short)-1) && PyErr_Occurred())) __PYX_ERR(0, 44, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    (((__pyx_v_self->h[0]).cards[__pyx_v_i])[0]).rank = ((unsigned short)__pyx_t_5);
+
+    /* "cribbagehelper/core/hand/hand.pyx":45
+ * 		for i in range(len(ranks)):
+ * 			self.h[0].cards[i][0].rank = <unsigned short> ranks[i]
+ * 			self.h[0].cards[i][0].suit = <char> ord(suits[i])             # <<<<<<<<<<<<<<
+ * 
+ * 	def __dealloc__(self):
+*/
+    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_suits, __pyx_v_i, Py_ssize_t, 1, PyLong_FromSsize_t, 0, 1, 1, 1, __Pyx_ReferenceSharing_FunctionArgument); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_6 = __Pyx_PyObject_Ord(__pyx_t_4); if (unlikely(__pyx_t_6 == ((long)(long)(Py_UCS4)-1))) __PYX_ERR(0, 45, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    (((__pyx_v_self->h[0]).cards[__pyx_v_i])[0]).suit = ((char)__pyx_t_6);
+  }
+
+  /* "cribbagehelper/core/hand/hand.pyx":41
+ * 		self.h = setupHand(<unsigned short> len(ranks))
+ * 
+ * 	def __init__(self, ranks, suits):             # <<<<<<<<<<<<<<
+ * 		# TODO: error handling
+ * 		for i in range(len(ranks)):
+*/
 
   /* function exit code */
   __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.Hand.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "cribbagehelper/core/hand/hand.pyx":53
- * 		pass
+/* "cribbagehelper/core/hand/hand.pyx":47
+ * 			self.h[0].cards[i][0].suit = <char> ord(suits[i])
  * 
  * 	def __dealloc__(self):             # <<<<<<<<<<<<<<
- * 		free_hand(self.h)
+ * 		freeHand(self.h)
  * 
 */
 
 /* Python wrapper */
-static void __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_5__dealloc__(PyObject *__pyx_v_self); /*proto*/
-static void __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_5__dealloc__(PyObject *__pyx_v_self) {
+static void __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_5__dealloc__(PyObject *__pyx_v_self); /*proto*/
+static void __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_5__dealloc__(PyObject *__pyx_v_self) {
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__ (wrapper)", 0);
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
-  __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_4__dealloc__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *)__pyx_v_self));
+  __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_4__dealloc__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-static void __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_4__dealloc__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self) {
+static void __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_4__dealloc__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self) {
 
-  /* "cribbagehelper/core/hand/hand.pyx":54
+  /* "cribbagehelper/core/hand/hand.pyx":48
  * 
  * 	def __dealloc__(self):
- * 		free_hand(self.h)             # <<<<<<<<<<<<<<
+ * 		freeHand(self.h)             # <<<<<<<<<<<<<<
  * 
  * 	def __enter__(self):
 */
-  free_hand(__pyx_v_self->h);
+  freeHand(__pyx_v_self->h);
 
-  /* "cribbagehelper/core/hand/hand.pyx":53
- * 		pass
+  /* "cribbagehelper/core/hand/hand.pyx":47
+ * 			self.h[0].cards[i][0].suit = <char> ord(suits[i])
  * 
  * 	def __dealloc__(self):             # <<<<<<<<<<<<<<
- * 		free_hand(self.h)
+ * 		freeHand(self.h)
  * 
 */
 
   /* function exit code */
 }
 
-/* "cribbagehelper/core/hand/hand.pyx":56
- * 		free_hand(self.h)
+/* "cribbagehelper/core/hand/hand.pyx":50
+ * 		freeHand(self.h)
  * 
  * 	def __enter__(self):             # <<<<<<<<<<<<<<
  * 		return self
@@ -3143,15 +2943,15 @@ static void __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_4__dealloc__(struc
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_7__enter__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_7__enter__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_14cribbagehelper_4core_4hand_4hand_4hand_7__enter__ = {"__enter__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_7__enter__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_7__enter__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_14cribbagehelper_4core_4hand_4hand_4Hand_7__enter__ = {"__enter__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_7__enter__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_7__enter__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3177,19 +2977,19 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   const Py_ssize_t __pyx_kwds_len = unlikely(__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
   if (unlikely(__pyx_kwds_len < 0)) return NULL;
   if (unlikely(__pyx_kwds_len > 0)) {__Pyx_RejectKeywords("__enter__", __pyx_kwds); return NULL;}
-  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_6__enter__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *)__pyx_v_self));
+  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_6__enter__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_6__enter__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self) {
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_6__enter__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__enter__", 0);
 
-  /* "cribbagehelper/core/hand/hand.pyx":57
+  /* "cribbagehelper/core/hand/hand.pyx":51
  * 
  * 	def __enter__(self):
  * 		return self             # <<<<<<<<<<<<<<
@@ -3201,8 +3001,8 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_6__enter__(st
   __pyx_r = ((PyObject *)__pyx_v_self);
   goto __pyx_L0;
 
-  /* "cribbagehelper/core/hand/hand.pyx":56
- * 		free_hand(self.h)
+  /* "cribbagehelper/core/hand/hand.pyx":50
+ * 		freeHand(self.h)
  * 
  * 	def __enter__(self):             # <<<<<<<<<<<<<<
  * 		return self
@@ -3216,7 +3016,7 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_6__enter__(st
   return __pyx_r;
 }
 
-/* "cribbagehelper/core/hand/hand.pyx":59
+/* "cribbagehelper/core/hand/hand.pyx":53
  * 		return self
  * 
  * 	def __exit__(self, exc_type, exc_value, exc_tb):             # <<<<<<<<<<<<<<
@@ -3225,15 +3025,15 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_6__enter__(st
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_9__exit__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_9__exit__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_14cribbagehelper_4core_4hand_4hand_4hand_9__exit__ = {"__exit__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_9__exit__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_9__exit__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_14cribbagehelper_4core_4hand_4hand_4Hand_9__exit__ = {"__exit__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_9__exit__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_9__exit__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3265,38 +3065,38 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_exc_type,&__pyx_mstate_global->__pyx_n_u_exc_value,&__pyx_mstate_global->__pyx_n_u_exc_tb,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 59, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len) < 0) __PYX_ERR(0, 53, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  3:
         values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 59, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 53, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  2:
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 59, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 53, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 59, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 53, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "__exit__", 0) < (0)) __PYX_ERR(0, 59, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "__exit__", 0) < (0)) __PYX_ERR(0, 53, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 3; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, i); __PYX_ERR(0, 59, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, i); __PYX_ERR(0, 53, __pyx_L3_error) }
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 59, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 53, __pyx_L3_error)
       values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 59, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 53, __pyx_L3_error)
       values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 59, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 53, __pyx_L3_error)
     }
     __pyx_v_exc_type = values[0];
     __pyx_v_exc_value = values[1];
@@ -3304,18 +3104,18 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 59, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 53, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.hand.__exit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.Hand.__exit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_8__exit__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *)__pyx_v_self), __pyx_v_exc_type, __pyx_v_exc_value, __pyx_v_exc_tb);
+  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_8__exit__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *)__pyx_v_self), __pyx_v_exc_type, __pyx_v_exc_value, __pyx_v_exc_tb);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -3325,7 +3125,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_8__exit__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self, PyObject *__pyx_v_exc_type, CYTHON_UNUSED PyObject *__pyx_v_exc_value, CYTHON_UNUSED PyObject *__pyx_v_exc_tb) {
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_8__exit__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self, PyObject *__pyx_v_exc_type, CYTHON_UNUSED PyObject *__pyx_v_exc_value, CYTHON_UNUSED PyObject *__pyx_v_exc_tb) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
@@ -3335,7 +3135,7 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_8__exit__(CYT
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__exit__", 0);
 
-  /* "cribbagehelper/core/hand/hand.pyx":60
+  /* "cribbagehelper/core/hand/hand.pyx":54
  * 
  * 	def __exit__(self, exc_type, exc_value, exc_tb):
  * 		return exc_type is None             # <<<<<<<<<<<<<<
@@ -3344,13 +3144,13 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_8__exit__(CYT
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = (__pyx_v_exc_type == Py_None);
-  __pyx_t_2 = __Pyx_PyBool_FromLong(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBool_FromLong(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "cribbagehelper/core/hand/hand.pyx":59
+  /* "cribbagehelper/core/hand/hand.pyx":53
  * 		return self
  * 
  * 	def __exit__(self, exc_type, exc_value, exc_tb):             # <<<<<<<<<<<<<<
@@ -3361,7 +3161,7 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_8__exit__(CYT
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.hand.__exit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.Hand.__exit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -3369,47 +3169,47 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_8__exit__(CYT
   return __pyx_r;
 }
 
-/* "cribbagehelper/core/hand/hand.pyx":62
+/* "cribbagehelper/core/hand/hand.pyx":56
  * 		return exc_type is None
  * 
  * 	def __len__(self):             # <<<<<<<<<<<<<<
- * 		return self.h[0].ncards
+ * 		return self.h[0].nCards
  * 
 */
 
 /* Python wrapper */
-static Py_ssize_t __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_11__len__(PyObject *__pyx_v_self); /*proto*/
-static Py_ssize_t __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_11__len__(PyObject *__pyx_v_self) {
+static Py_ssize_t __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_11__len__(PyObject *__pyx_v_self); /*proto*/
+static Py_ssize_t __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_11__len__(PyObject *__pyx_v_self) {
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
   Py_ssize_t __pyx_r;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__len__ (wrapper)", 0);
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
-  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_10__len__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *)__pyx_v_self));
+  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_10__len__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static Py_ssize_t __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_10__len__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self) {
+static Py_ssize_t __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_10__len__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self) {
   Py_ssize_t __pyx_r;
 
-  /* "cribbagehelper/core/hand/hand.pyx":63
+  /* "cribbagehelper/core/hand/hand.pyx":57
  * 
  * 	def __len__(self):
- * 		return self.h[0].ncards             # <<<<<<<<<<<<<<
+ * 		return self.h[0].nCards             # <<<<<<<<<<<<<<
  * 
  * 	def __repr__(self):
 */
-  __pyx_r = (__pyx_v_self->h[0]).ncards;
+  __pyx_r = (__pyx_v_self->h[0]).nCards;
   goto __pyx_L0;
 
-  /* "cribbagehelper/core/hand/hand.pyx":62
+  /* "cribbagehelper/core/hand/hand.pyx":56
  * 		return exc_type is None
  * 
  * 	def __len__(self):             # <<<<<<<<<<<<<<
- * 		return self.h[0].ncards
+ * 		return self.h[0].nCards
  * 
 */
 
@@ -3418,8 +3218,8 @@ static Py_ssize_t __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_10__len__(st
   return __pyx_r;
 }
 
-/* "cribbagehelper/core/hand/hand.pyx":65
- * 		return self.h[0].ncards
+/* "cribbagehelper/core/hand/hand.pyx":59
+ * 		return self.h[0].nCards
  * 
  * 	def __repr__(self):             # <<<<<<<<<<<<<<
  * 		rep = "<cribbagehelder.hand: "
@@ -3427,21 +3227,21 @@ static Py_ssize_t __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_10__len__(st
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_13__repr__(PyObject *__pyx_v_self); /*proto*/
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_13__repr__(PyObject *__pyx_v_self) {
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_13__repr__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_13__repr__(PyObject *__pyx_v_self) {
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__repr__ (wrapper)", 0);
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
-  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *)__pyx_v_self));
+  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_12__repr__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self) {
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_12__repr__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self) {
   PyObject *__pyx_v_rep = NULL;
   PyObject *__pyx_v_i = NULL;
   PyObject *__pyx_v_c = NULL;
@@ -3460,7 +3260,7 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(st
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__repr__", 0);
 
-  /* "cribbagehelper/core/hand/hand.pyx":66
+  /* "cribbagehelper/core/hand/hand.pyx":60
  * 
  * 	def __repr__(self):
  * 		rep = "<cribbagehelder.hand: "             # <<<<<<<<<<<<<<
@@ -3470,7 +3270,7 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(st
   __Pyx_INCREF(__pyx_mstate_global->__pyx_kp_u_cribbagehelder_hand);
   __pyx_v_rep = __pyx_mstate_global->__pyx_kp_u_cribbagehelder_hand;
 
-  /* "cribbagehelper/core/hand/hand.pyx":67
+  /* "cribbagehelper/core/hand/hand.pyx":61
  * 	def __repr__(self):
  * 		rep = "<cribbagehelder.hand: "
  * 		for i in range(self.__len__()):             # <<<<<<<<<<<<<<
@@ -3485,7 +3285,7 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(st
     PyObject *__pyx_callargs[2] = {__pyx_t_4, NULL};
     __pyx_t_3 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_len, __pyx_callargs+__pyx_t_5, (1-__pyx_t_5) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 67, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 61, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
   }
   __pyx_t_5 = 1;
@@ -3494,12 +3294,12 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(st
     __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)(&PyRange_Type), __pyx_callargs+__pyx_t_5, (2-__pyx_t_5) | (__pyx_t_5*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 61, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
   }
-  __pyx_t_3 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 67, __pyx_L1_error)
+  __pyx_t_3 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 61, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_6 = (CYTHON_COMPILING_IN_LIMITED_API) ? PyIter_Next : __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 67, __pyx_L1_error)
+  __pyx_t_6 = (CYTHON_COMPILING_IN_LIMITED_API) ? PyIter_Next : __Pyx_PyObject_GetIterNextFunc(__pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 61, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   for (;;) {
     {
@@ -3507,7 +3307,7 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(st
       if (unlikely(!__pyx_t_1)) {
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
-          if (unlikely(!__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) __PYX_ERR(0, 67, __pyx_L1_error)
+          if (unlikely(!__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) __PYX_ERR(0, 61, __pyx_L1_error)
           PyErr_Clear();
         }
         break;
@@ -3517,27 +3317,27 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(st
     __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "cribbagehelper/core/hand/hand.pyx":68
+    /* "cribbagehelper/core/hand/hand.pyx":62
  * 		rep = "<cribbagehelder.hand: "
  * 		for i in range(self.__len__()):
  * 			if i: rep += ", "             # <<<<<<<<<<<<<<
  * 			c = self.__getitem__(i)
- * 			rep += "%s of %s" % (
+ * 			rep += "%s of %s" % (c.rank, c.suit)
 */
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_v_i); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 68, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_v_i); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 62, __pyx_L1_error)
     if (__pyx_t_7) {
-      __pyx_t_1 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_v_rep, __pyx_mstate_global->__pyx_kp_u_); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_v_rep, __pyx_mstate_global->__pyx_kp_u_); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 62, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF_SET(__pyx_v_rep, ((PyObject*)__pyx_t_1));
       __pyx_t_1 = 0;
     }
 
-    /* "cribbagehelper/core/hand/hand.pyx":69
+    /* "cribbagehelper/core/hand/hand.pyx":63
  * 		for i in range(self.__len__()):
  * 			if i: rep += ", "
  * 			c = self.__getitem__(i)             # <<<<<<<<<<<<<<
- * 			rep += "%s of %s" % (
- * 				c.__repr__().split()[-2],
+ * 			rep += "%s of %s" % (c.rank, c.suit)
+ * 		rep += ">"
 */
     __pyx_t_2 = ((PyObject *)__pyx_v_self);
     __Pyx_INCREF(__pyx_t_2);
@@ -3546,87 +3346,44 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(st
       PyObject *__pyx_callargs[2] = {__pyx_t_2, __pyx_v_i};
       __pyx_t_1 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_getitem, __pyx_callargs+__pyx_t_5, (2-__pyx_t_5) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 69, __pyx_L1_error)
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
     }
     __Pyx_XDECREF_SET(__pyx_v_c, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "cribbagehelper/core/hand/hand.pyx":71
+    /* "cribbagehelper/core/hand/hand.pyx":64
+ * 			if i: rep += ", "
  * 			c = self.__getitem__(i)
- * 			rep += "%s of %s" % (
- * 				c.__repr__().split()[-2],             # <<<<<<<<<<<<<<
- * 				c.__repr__().split()[-1][:-1])
- * 		rep += ">"
-*/
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_c, __pyx_mstate_global->__pyx_n_u_repr); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_mstate_global->__pyx_n_u_split); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, -2L, long, 1, __Pyx_PyLong_From_long, 0, 1, 1, 1, __Pyx_ReferenceSharing_OwnStrongReference); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyObject_FormatSimpleAndDecref(PyObject_Str(__pyx_t_1), __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-    /* "cribbagehelper/core/hand/hand.pyx":72
- * 			rep += "%s of %s" % (
- * 				c.__repr__().split()[-2],
- * 				c.__repr__().split()[-1][:-1])             # <<<<<<<<<<<<<<
+ * 			rep += "%s of %s" % (c.rank, c.suit)             # <<<<<<<<<<<<<<
  * 		rep += ">"
  * 		return rep
 */
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_c, __pyx_mstate_global->__pyx_n_u_repr); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_c, __pyx_mstate_global->__pyx_n_u_rank); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_FormatSimpleAndDecref(PyObject_Str(__pyx_t_1), __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_c, __pyx_mstate_global->__pyx_n_u_suit); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_4 = __Pyx_PyObject_FormatSimpleAndDecref(PyObject_Str(__pyx_t_1), __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 64, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_mstate_global->__pyx_n_u_split); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_4, -1L, long, 1, __Pyx_PyLong_From_long, 0, 1, 1, 1, __Pyx_ReferenceSharing_OwnStrongReference); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_GetSlice(__pyx_t_1, 0, -1L, NULL, NULL, &__pyx_mstate_global->__pyx_slice[0], 0, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_FormatSimpleAndDecref(PyObject_Str(__pyx_t_4), __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_8[0] = __pyx_t_2;
     __pyx_t_8[1] = __pyx_mstate_global->__pyx_kp_u_of;
-    __pyx_t_8[2] = __pyx_t_1;
-
-    /* "cribbagehelper/core/hand/hand.pyx":70
- * 			if i: rep += ", "
- * 			c = self.__getitem__(i)
- * 			rep += "%s of %s" % (             # <<<<<<<<<<<<<<
- * 				c.__repr__().split()[-2],
- * 				c.__repr__().split()[-1][:-1])
-*/
-    __pyx_t_4 = __Pyx_PyUnicode_Join(__pyx_t_8, 3, __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2) + 4 + __Pyx_PyUnicode_GET_LENGTH(__pyx_t_1), 127 | __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) | __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_1));
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 70, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_v_rep, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __pyx_t_8[2] = __pyx_t_4;
+    __pyx_t_1 = __Pyx_PyUnicode_Join(__pyx_t_8, 3, __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2) + 4 + __Pyx_PyUnicode_GET_LENGTH(__pyx_t_4), 127 | __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) | __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_4));
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __Pyx_DECREF_SET(__pyx_v_rep, ((PyObject*)__pyx_t_1));
-    __pyx_t_1 = 0;
+    __pyx_t_4 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_v_rep, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 64, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_DECREF_SET(__pyx_v_rep, ((PyObject*)__pyx_t_4));
+    __pyx_t_4 = 0;
 
-    /* "cribbagehelper/core/hand/hand.pyx":67
+    /* "cribbagehelper/core/hand/hand.pyx":61
  * 	def __repr__(self):
  * 		rep = "<cribbagehelder.hand: "
  * 		for i in range(self.__len__()):             # <<<<<<<<<<<<<<
@@ -3636,20 +3393,20 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(st
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "cribbagehelper/core/hand/hand.pyx":73
- * 				c.__repr__().split()[-2],
- * 				c.__repr__().split()[-1][:-1])
+  /* "cribbagehelper/core/hand/hand.pyx":65
+ * 			c = self.__getitem__(i)
+ * 			rep += "%s of %s" % (c.rank, c.suit)
  * 		rep += ">"             # <<<<<<<<<<<<<<
  * 		return rep
  * 
 */
-  __pyx_t_3 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_v_rep, __pyx_mstate_global->__pyx_kp_u__2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyUnicode_Concat__Pyx_ReferenceSharing_OwnStrongReferenceInPlace(__pyx_v_rep, __pyx_mstate_global->__pyx_kp_u__2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF_SET(__pyx_v_rep, ((PyObject*)__pyx_t_3));
   __pyx_t_3 = 0;
 
-  /* "cribbagehelper/core/hand/hand.pyx":74
- * 				c.__repr__().split()[-1][:-1])
+  /* "cribbagehelper/core/hand/hand.pyx":66
+ * 			rep += "%s of %s" % (c.rank, c.suit)
  * 		rep += ">"
  * 		return rep             # <<<<<<<<<<<<<<
  * 
@@ -3660,8 +3417,8 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(st
   __pyx_r = __pyx_v_rep;
   goto __pyx_L0;
 
-  /* "cribbagehelper/core/hand/hand.pyx":65
- * 		return self.h[0].ncards
+  /* "cribbagehelper/core/hand/hand.pyx":59
+ * 		return self.h[0].nCards
  * 
  * 	def __repr__(self):             # <<<<<<<<<<<<<<
  * 		rep = "<cribbagehelder.hand: "
@@ -3674,7 +3431,7 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(st
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.hand.__repr__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.Hand.__repr__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_rep);
@@ -3685,108 +3442,104 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_12__repr__(st
   return __pyx_r;
 }
 
-/* "cribbagehelper/core/hand/hand.pyx":76
+/* "cribbagehelper/core/hand/hand.pyx":68
  * 		return rep
  * 
  * 	def __getitem__(self, index):             # <<<<<<<<<<<<<<
- * 		cdef void *ptr = <void *> self.h[0].cards[index]
- * 		c = card(1, 's')
+ * 		# TODO: error handling
+ * 		return Card(
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_15__getitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_index); /*proto*/
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_15__getitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_index) {
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_15__getitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_index); /*proto*/
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_15__getitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_index) {
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__getitem__ (wrapper)", 0);
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
-  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_14__getitem__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *)__pyx_v_self), ((PyObject *)__pyx_v_index));
+  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_14__getitem__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *)__pyx_v_self), ((PyObject *)__pyx_v_index));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_14__getitem__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self, PyObject *__pyx_v_index) {
-  void *__pyx_v_ptr;
-  struct __pyx_obj_14cribbagehelper_4core_4card_4card_card *__pyx_v_c = NULL;
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_14__getitem__(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self, PyObject *__pyx_v_index) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
+  PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
+  Py_ssize_t __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  size_t __pyx_t_6;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__getitem__", 0);
 
-  /* "cribbagehelper/core/hand/hand.pyx":77
- * 
+  /* "cribbagehelper/core/hand/hand.pyx":70
  * 	def __getitem__(self, index):
- * 		cdef void *ptr = <void *> self.h[0].cards[index]             # <<<<<<<<<<<<<<
- * 		c = card(1, 's')
- * 		free(c.c)
-*/
-  __pyx_t_1 = __Pyx_PyIndex_AsSsize_t(__pyx_v_index); if (unlikely((__pyx_t_1 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 77, __pyx_L1_error)
-  __pyx_v_ptr = ((void *)((__pyx_v_self->h[0]).cards[__pyx_t_1]));
-
-  /* "cribbagehelper/core/hand/hand.pyx":78
- * 	def __getitem__(self, index):
- * 		cdef void *ptr = <void *> self.h[0].cards[index]
- * 		c = card(1, 's')             # <<<<<<<<<<<<<<
- * 		free(c.c)
- * 		c.c = <CARD *> ptr
-*/
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_mstate_global->__pyx_ptype_14cribbagehelper_4core_4card_4card_card), __pyx_mstate_global->__pyx_tuple[0], NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_v_c = ((struct __pyx_obj_14cribbagehelper_4core_4card_4card_card *)__pyx_t_2);
-  __pyx_t_2 = 0;
-
-  /* "cribbagehelper/core/hand/hand.pyx":79
- * 		cdef void *ptr = <void *> self.h[0].cards[index]
- * 		c = card(1, 's')
- * 		free(c.c)             # <<<<<<<<<<<<<<
- * 		c.c = <CARD *> ptr
- * 		# self.h[0].cards[index]
-*/
-  free(__pyx_v_c->c);
-
-  /* "cribbagehelper/core/hand/hand.pyx":80
- * 		c = card(1, 's')
- * 		free(c.c)
- * 		c.c = <CARD *> ptr             # <<<<<<<<<<<<<<
- * 		# self.h[0].cards[index]
- * 		return c
-*/
-  __pyx_v_c->c = ((CARD *)__pyx_v_ptr);
-
-  /* "cribbagehelper/core/hand/hand.pyx":82
- * 		c.c = <CARD *> ptr
- * 		# self.h[0].cards[index]
- * 		return c             # <<<<<<<<<<<<<<
- * 
- * 
+ * 		# TODO: error handling
+ * 		return Card(             # <<<<<<<<<<<<<<
+ * 			self.h[0].cards[index][0].rank,
+ * 			chr(self.h[0].cards[index][0].suit))
 */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF((PyObject *)__pyx_v_c);
-  __pyx_r = ((PyObject *)__pyx_v_c);
+  __pyx_t_2 = NULL;
+
+  /* "cribbagehelper/core/hand/hand.pyx":71
+ * 		# TODO: error handling
+ * 		return Card(
+ * 			self.h[0].cards[index][0].rank,             # <<<<<<<<<<<<<<
+ * 			chr(self.h[0].cards[index][0].suit))
+ * 
+*/
+  __pyx_t_3 = __Pyx_PyIndex_AsSsize_t(__pyx_v_index); if (unlikely((__pyx_t_3 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 71, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyLong_From_unsigned_int((((__pyx_v_self->h[0]).cards[__pyx_t_3])[0]).rank); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+
+  /* "cribbagehelper/core/hand/hand.pyx":72
+ * 		return Card(
+ * 			self.h[0].cards[index][0].rank,
+ * 			chr(self.h[0].cards[index][0].suit))             # <<<<<<<<<<<<<<
+ * 
+*/
+  __pyx_t_3 = __Pyx_PyIndex_AsSsize_t(__pyx_v_index); if (unlikely((__pyx_t_3 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_5 = PyUnicode_FromOrdinal((((__pyx_v_self->h[0]).cards[__pyx_t_3])[0]).suit); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_6 = 1;
+  {
+    PyObject *__pyx_callargs[3] = {__pyx_t_2, __pyx_t_4, __pyx_t_5};
+    __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_mstate_global->__pyx_ptype_14cribbagehelper_4core_4card_4card_Card, __pyx_callargs+__pyx_t_6, (3-__pyx_t_6) | (__pyx_t_6*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+    __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __Pyx_GOTREF((PyObject *)__pyx_t_1);
+  }
+  __pyx_r = ((PyObject *)__pyx_t_1);
+  __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "cribbagehelper/core/hand/hand.pyx":76
+  /* "cribbagehelper/core/hand/hand.pyx":68
  * 		return rep
  * 
  * 	def __getitem__(self, index):             # <<<<<<<<<<<<<<
- * 		cdef void *ptr = <void *> self.h[0].cards[index]
- * 		c = card(1, 's')
+ * 		# TODO: error handling
+ * 		return Card(
 */
 
   /* function exit code */
   __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.hand.__getitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.Hand.__getitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_c);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
@@ -3799,15 +3552,15 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_14__getitem__
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_17__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_17__reduce_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_14cribbagehelper_4core_4hand_4hand_4hand_17__reduce_cython__ = {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_17__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_17__reduce_cython__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_14cribbagehelper_4core_4hand_4hand_4Hand_17__reduce_cython__ = {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_17__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_17__reduce_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3833,14 +3586,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   const Py_ssize_t __pyx_kwds_len = unlikely(__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
   if (unlikely(__pyx_kwds_len < 0)) return NULL;
   if (unlikely(__pyx_kwds_len > 0)) {__Pyx_RejectKeywords("__reduce_cython__", __pyx_kwds); return NULL;}
-  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_16__reduce_cython__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *)__pyx_v_self));
+  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_16__reduce_cython__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_16__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self) {
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_16__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
@@ -3865,7 +3618,7 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_16__reduce_cy
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.hand.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.Hand.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
@@ -3880,15 +3633,15 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_16__reduce_cy
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_19__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_19__setstate_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_14cribbagehelper_4core_4hand_4hand_4hand_19__setstate_cython__ = {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_19__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_19__setstate_cython__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_14cribbagehelper_4core_4hand_4hand_4Hand_19__setstate_cython__ = {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_19__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_19__setstate_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3950,11 +3703,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.hand.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.Hand.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_18__setstate_cython__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *)__pyx_v_self), __pyx_v___pyx_state);
+  __pyx_r = __pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_18__setstate_cython__(((struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *)__pyx_v_self), __pyx_v___pyx_state);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -3964,7 +3717,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_18__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4Hand_18__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
@@ -3989,7 +3742,7 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_18__setstate_
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.hand.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("cribbagehelper.core.hand.hand.Hand.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
@@ -3997,21 +3750,21 @@ static PyObject *__pyx_pf_14cribbagehelper_4core_4hand_4hand_4hand_18__setstate_
 }
 /* #### Code section: module_exttypes ### */
 
-static PyObject *__pyx_tp_new_14cribbagehelper_4core_4hand_4hand_hand(PyTypeObject *t, PyObject *a, PyObject *k) {
+static PyObject *__pyx_tp_new_14cribbagehelper_4core_4hand_4hand_Hand(PyTypeObject *t, PyObject *a, PyObject *k) {
   PyObject *o;
   o = __Pyx_AllocateExtensionType(t, 0);
   if (unlikely(!o)) return 0;
-  if (unlikely(__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_1__cinit__(o, a, k) < 0)) goto bad;
+  if (unlikely(__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_1__cinit__(o, a, k) < 0)) goto bad;
   return o;
   bad:
   Py_DECREF(o); o = 0;
   return NULL;
 }
 
-static void __pyx_tp_dealloc_14cribbagehelper_4core_4hand_4hand_hand(PyObject *o) {
+static void __pyx_tp_dealloc_14cribbagehelper_4core_4hand_4hand_Hand(PyObject *o) {
   #if CYTHON_USE_TP_FINALIZE
   if (unlikely(__Pyx_PyObject_GetSlot(o, tp_finalize, destructor)) && (!PyType_IS_GC(Py_TYPE(o)) || !__Pyx_PyObject_GC_IsFinalized(o))) {
-    if (__Pyx_PyObject_GetSlot(o, tp_dealloc, destructor) == __pyx_tp_dealloc_14cribbagehelper_4core_4hand_4hand_hand) {
+    if (__Pyx_PyObject_GetSlot(o, tp_dealloc, destructor) == __pyx_tp_dealloc_14cribbagehelper_4core_4hand_4hand_Hand) {
       if (PyObject_CallFinalizerFromDealloc(o)) return;
     }
   }
@@ -4020,7 +3773,7 @@ static void __pyx_tp_dealloc_14cribbagehelper_4core_4hand_4hand_hand(PyObject *o
     PyObject *etype, *eval, *etb;
     PyErr_Fetch(&etype, &eval, &etb);
     __Pyx_SET_REFCNT(o, Py_REFCNT(o) + 1);
-    __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_5__dealloc__(o);
+    __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_5__dealloc__(o);
     __Pyx_SET_REFCNT(o, Py_REFCNT(o) - 1);
     PyErr_Restore(etype, eval, etb);
   }
@@ -4038,7 +3791,7 @@ static void __pyx_tp_dealloc_14cribbagehelper_4core_4hand_4hand_hand(PyObject *o
   #endif
 }
 
-static PyObject *__pyx_sq_item_14cribbagehelper_4core_4hand_4hand_hand(PyObject *o, Py_ssize_t i) {
+static PyObject *__pyx_sq_item_14cribbagehelper_4core_4hand_4hand_Hand(PyObject *o, Py_ssize_t i) {
   PyObject *r;
   PyObject *x = PyLong_FromSsize_t(i); if(!x) return 0;
   #if CYTHON_USE_TYPE_SLOTS || (!CYTHON_USE_TYPE_SPECS && __PYX_LIMITED_VERSION_HEX < 0x030A0000)
@@ -4050,41 +3803,41 @@ static PyObject *__pyx_sq_item_14cribbagehelper_4core_4hand_4hand_hand(PyObject 
   return r;
 }
 
-static PyMethodDef __pyx_methods_14cribbagehelper_4core_4hand_4hand_hand[] = {
-  {"__enter__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_7__enter__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"__exit__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_9__exit__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_17__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_19__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+static PyMethodDef __pyx_methods_14cribbagehelper_4core_4hand_4hand_Hand[] = {
+  {"__enter__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_7__enter__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"__exit__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_9__exit__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_17__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_19__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
 };
 #if CYTHON_USE_TYPE_SPECS
-static PyType_Slot __pyx_type_14cribbagehelper_4core_4hand_4hand_hand_slots[] = {
-  {Py_tp_dealloc, (void *)__pyx_tp_dealloc_14cribbagehelper_4core_4hand_4hand_hand},
-  {Py_tp_repr, (void *)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_13__repr__},
-  {Py_sq_length, (void *)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_11__len__},
-  {Py_sq_item, (void *)__pyx_sq_item_14cribbagehelper_4core_4hand_4hand_hand},
-  {Py_mp_length, (void *)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_11__len__},
-  {Py_mp_subscript, (void *)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_15__getitem__},
+static PyType_Slot __pyx_type_14cribbagehelper_4core_4hand_4hand_Hand_slots[] = {
+  {Py_tp_dealloc, (void *)__pyx_tp_dealloc_14cribbagehelper_4core_4hand_4hand_Hand},
+  {Py_tp_repr, (void *)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_13__repr__},
+  {Py_sq_length, (void *)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_11__len__},
+  {Py_sq_item, (void *)__pyx_sq_item_14cribbagehelper_4core_4hand_4hand_Hand},
+  {Py_mp_length, (void *)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_11__len__},
+  {Py_mp_subscript, (void *)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_15__getitem__},
   {Py_tp_doc, (void *)PyDoc_STR("\n\t.. class:: cribbagehelper.core.hand(ranks, suits)\n\n\t\tThe base class for a hand of cards.\n\n\t\tParameters\n\t\t----------\n\t\tranks : array-like\n\t\t\tThe ranks of each card, specified as an integer between 1 and 13: 1\n\t\t\tfor Ace, 11 for Jack, 12 for Queen, 13 King, and otherwise the\n\t\t\tnumerical value of each card.\n\t\tsuits : array-like\n\t\t\tThe suits of each card: 'c' for clubs, 'd' for diamonds, 'h' for\n\t\t\thearts, and 's' for spades. Should be a component-wise match to the\n\t\t\telements of ``ranks``.\n\n\t\t.. todo::\n\n\t\t\t* Error handling\n\n\t\t\t* Functions and example code.\n\t")},
-  {Py_tp_methods, (void *)__pyx_methods_14cribbagehelper_4core_4hand_4hand_hand},
-  {Py_tp_init, (void *)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_3__init__},
-  {Py_tp_new, (void *)__pyx_tp_new_14cribbagehelper_4core_4hand_4hand_hand},
+  {Py_tp_methods, (void *)__pyx_methods_14cribbagehelper_4core_4hand_4hand_Hand},
+  {Py_tp_init, (void *)__pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_3__init__},
+  {Py_tp_new, (void *)__pyx_tp_new_14cribbagehelper_4core_4hand_4hand_Hand},
   {0, 0},
 };
-static PyType_Spec __pyx_type_14cribbagehelper_4core_4hand_4hand_hand_spec = {
-  "cribbagehelper.core.hand.hand.hand",
-  sizeof(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand),
+static PyType_Spec __pyx_type_14cribbagehelper_4core_4hand_4hand_Hand_spec = {
+  "cribbagehelper.core.hand.hand.Hand",
+  sizeof(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE,
-  __pyx_type_14cribbagehelper_4core_4hand_4hand_hand_slots,
+  __pyx_type_14cribbagehelper_4core_4hand_4hand_Hand_slots,
 };
 #else
 
-static PySequenceMethods __pyx_tp_as_sequence_hand = {
-  __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_11__len__, /*sq_length*/
+static PySequenceMethods __pyx_tp_as_sequence_Hand = {
+  __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_11__len__, /*sq_length*/
   0, /*sq_concat*/
   0, /*sq_repeat*/
-  __pyx_sq_item_14cribbagehelper_4core_4hand_4hand_hand, /*sq_item*/
+  __pyx_sq_item_14cribbagehelper_4core_4hand_4hand_Hand, /*sq_item*/
   0, /*sq_slice*/
   0, /*sq_ass_item*/
   0, /*sq_ass_slice*/
@@ -4093,26 +3846,26 @@ static PySequenceMethods __pyx_tp_as_sequence_hand = {
   0, /*sq_inplace_repeat*/
 };
 
-static PyMappingMethods __pyx_tp_as_mapping_hand = {
-  __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_11__len__, /*mp_length*/
-  __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_15__getitem__, /*mp_subscript*/
+static PyMappingMethods __pyx_tp_as_mapping_Hand = {
+  __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_11__len__, /*mp_length*/
+  __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_15__getitem__, /*mp_subscript*/
   0, /*mp_ass_subscript*/
 };
 
-static PyTypeObject __pyx_type_14cribbagehelper_4core_4hand_4hand_hand = {
+static PyTypeObject __pyx_type_14cribbagehelper_4core_4hand_4hand_Hand = {
   PyVarObject_HEAD_INIT(0, 0)
-  "cribbagehelper.core.hand.hand.""hand", /*tp_name*/
-  sizeof(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_hand), /*tp_basicsize*/
+  "cribbagehelper.core.hand.hand.""Hand", /*tp_name*/
+  sizeof(struct __pyx_obj_14cribbagehelper_4core_4hand_4hand_Hand), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_14cribbagehelper_4core_4hand_4hand_hand, /*tp_dealloc*/
+  __pyx_tp_dealloc_14cribbagehelper_4core_4hand_4hand_Hand, /*tp_dealloc*/
   0, /*tp_vectorcall_offset*/
   0, /*tp_getattr*/
   0, /*tp_setattr*/
   0, /*tp_as_async*/
-  __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_13__repr__, /*tp_repr*/
+  __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_13__repr__, /*tp_repr*/
   0, /*tp_as_number*/
-  &__pyx_tp_as_sequence_hand, /*tp_as_sequence*/
-  &__pyx_tp_as_mapping_hand, /*tp_as_mapping*/
+  &__pyx_tp_as_sequence_Hand, /*tp_as_sequence*/
+  &__pyx_tp_as_mapping_Hand, /*tp_as_mapping*/
   0, /*tp_hash*/
   0, /*tp_call*/
   0, /*tp_str*/
@@ -4127,7 +3880,7 @@ static PyTypeObject __pyx_type_14cribbagehelper_4core_4hand_4hand_hand = {
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
   0, /*tp_iternext*/
-  __pyx_methods_14cribbagehelper_4core_4hand_4hand_hand, /*tp_methods*/
+  __pyx_methods_14cribbagehelper_4core_4hand_4hand_Hand, /*tp_methods*/
   0, /*tp_members*/
   0, /*tp_getset*/
   0, /*tp_base*/
@@ -4137,9 +3890,9 @@ static PyTypeObject __pyx_type_14cribbagehelper_4core_4hand_4hand_hand = {
   #if !CYTHON_USE_TYPE_SPECS
   0, /*tp_dictoffset*/
   #endif
-  __pyx_pw_14cribbagehelper_4core_4hand_4hand_4hand_3__init__, /*tp_init*/
+  __pyx_pw_14cribbagehelper_4core_4hand_4hand_4Hand_3__init__, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_14cribbagehelper_4core_4hand_4hand_hand, /*tp_new*/
+  __pyx_tp_new_14cribbagehelper_4core_4hand_4hand_Hand, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -4226,26 +3979,26 @@ static int __Pyx_modinit_type_init_code(__pyx_mstatetype *__pyx_mstate) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_14cribbagehelper_4core_4hand_4hand_hand_spec, NULL); if (unlikely(!__pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand)) __PYX_ERR(0, 10, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_14cribbagehelper_4core_4hand_4hand_hand_spec, __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand) < (0)) __PYX_ERR(0, 10, __pyx_L1_error)
+  __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_14cribbagehelper_4core_4hand_4hand_Hand_spec, NULL); if (unlikely(!__pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand)) __PYX_ERR(0, 12, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_14cribbagehelper_4core_4hand_4hand_Hand_spec, __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand) < (0)) __PYX_ERR(0, 12, __pyx_L1_error)
   #else
-  __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand = &__pyx_type_14cribbagehelper_4core_4hand_4hand_hand;
+  __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand = &__pyx_type_14cribbagehelper_4core_4hand_4hand_Hand;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand) < (0)) __PYX_ERR(0, 10, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand) < (0)) __PYX_ERR(0, 12, __pyx_L1_error)
   #endif
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
-  PyUnstable_Object_EnableDeferredRefcount((PyObject*)__pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand);
+  PyUnstable_Object_EnableDeferredRefcount((PyObject*)__pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand);
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
-  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand->tp_dictoffset && __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand->tp_getattro == PyObject_GenericGetAttr)) {
-    __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand->tp_getattro = PyObject_GenericGetAttr;
+  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand->tp_dictoffset && __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand->tp_getattro == PyObject_GenericGetAttr)) {
+    __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand->tp_getattro = PyObject_GenericGetAttr;
   }
   #endif
-  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_hand, (PyObject *) __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand) < (0)) __PYX_ERR(0, 10, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand) < (0)) __PYX_ERR(0, 10, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_Hand, (PyObject *) __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand) < (0)) __PYX_ERR(0, 12, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand) < (0)) __PYX_ERR(0, 12, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -4264,15 +4017,15 @@ static int __Pyx_modinit_type_import_code(__pyx_mstatetype *__pyx_mstate) {
   /*--- Type import code ---*/
   __pyx_t_1 = PyImport_ImportModule("cribbagehelper.core.card.card"); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4card_4card_card = __Pyx_ImportType_3_2_4(__pyx_t_1, "cribbagehelper.core.card.card", "card",
+  __pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4card_4card_Card = __Pyx_ImportType_3_2_4(__pyx_t_1, "cribbagehelper.core.card.card", "Card",
   #if defined(PYPY_VERSION_NUM) && PYPY_VERSION_NUM < 0x050B0000
-  sizeof(struct __pyx_obj_14cribbagehelper_4core_4card_4card_card), __PYX_GET_STRUCT_ALIGNMENT_3_2_4(struct __pyx_obj_14cribbagehelper_4core_4card_4card_card),
+  sizeof(struct __pyx_obj_14cribbagehelper_4core_4card_4card_Card), __PYX_GET_STRUCT_ALIGNMENT_3_2_4(struct __pyx_obj_14cribbagehelper_4core_4card_4card_Card),
   #elif CYTHON_COMPILING_IN_LIMITED_API
-  sizeof(struct __pyx_obj_14cribbagehelper_4core_4card_4card_card), __PYX_GET_STRUCT_ALIGNMENT_3_2_4(struct __pyx_obj_14cribbagehelper_4core_4card_4card_card),
+  sizeof(struct __pyx_obj_14cribbagehelper_4core_4card_4card_Card), __PYX_GET_STRUCT_ALIGNMENT_3_2_4(struct __pyx_obj_14cribbagehelper_4core_4card_4card_Card),
   #else
-  sizeof(struct __pyx_obj_14cribbagehelper_4core_4card_4card_card), __PYX_GET_STRUCT_ALIGNMENT_3_2_4(struct __pyx_obj_14cribbagehelper_4core_4card_4card_card),
+  sizeof(struct __pyx_obj_14cribbagehelper_4core_4card_4card_Card), __PYX_GET_STRUCT_ALIGNMENT_3_2_4(struct __pyx_obj_14cribbagehelper_4core_4card_4card_Card),
   #endif
-  __Pyx_ImportType_CheckSize_Warn_3_2_4); if (!__pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4card_4card_card) __PYX_ERR(2, 7, __pyx_L1_error)
+  __Pyx_ImportType_CheckSize_Warn_3_2_4); if (!__pyx_mstate->__pyx_ptype_14cribbagehelper_4core_4card_4card_Card) __PYX_ERR(2, 7, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -4566,34 +4319,46 @@ __Pyx_RefNannySetupContext("PyInit_hand", 0);
   (void)__Pyx_modinit_function_import_code(__pyx_mstate);
   /*--- Execution code ---*/
 
-  /* "cribbagehelper/core/hand/hand.pyx":56
- * 		free_hand(self.h)
+  /* "cribbagehelper/core/hand/hand.pyx":6
+ * # at: https://github.com/giganano/cribbagehelper.git
+ * 
+ * __all__ = ["Hand"]             # <<<<<<<<<<<<<<
+ * from . cimport hand
+ * from ..card cimport Card, CARD
+*/
+  __pyx_t_2 = __Pyx_PyList_Pack(1, __pyx_mstate_global->__pyx_n_u_Hand); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_all, __pyx_t_2) < (0)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "cribbagehelper/core/hand/hand.pyx":50
+ * 		freeHand(self.h)
  * 
  * 	def __enter__(self):             # <<<<<<<<<<<<<<
  * 		return self
  * 
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14cribbagehelper_4core_4hand_4hand_4hand_7__enter__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_hand___enter, NULL, __pyx_mstate_global->__pyx_n_u_cribbagehelper_core_hand_hand, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14cribbagehelper_4core_4hand_4hand_4Hand_7__enter__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_Hand___enter, NULL, __pyx_mstate_global->__pyx_n_u_cribbagehelper_core_hand_hand, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 50, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand, __pyx_mstate_global->__pyx_n_u_enter, __pyx_t_2) < (0)) __PYX_ERR(0, 56, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand, __pyx_mstate_global->__pyx_n_u_enter, __pyx_t_2) < (0)) __PYX_ERR(0, 50, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "cribbagehelper/core/hand/hand.pyx":59
+  /* "cribbagehelper/core/hand/hand.pyx":53
  * 		return self
  * 
  * 	def __exit__(self, exc_type, exc_value, exc_tb):             # <<<<<<<<<<<<<<
  * 		return exc_type is None
  * 
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14cribbagehelper_4core_4hand_4hand_4hand_9__exit__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_hand___exit, NULL, __pyx_mstate_global->__pyx_n_u_cribbagehelper_core_hand_hand, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[1])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14cribbagehelper_4core_4hand_4hand_4Hand_9__exit__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_Hand___exit, NULL, __pyx_mstate_global->__pyx_n_u_cribbagehelper_core_hand_hand, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[1])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_hand, __pyx_mstate_global->__pyx_n_u_exit, __pyx_t_2) < (0)) __PYX_ERR(0, 59, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_14cribbagehelper_4core_4hand_4hand_Hand, __pyx_mstate_global->__pyx_n_u_exit, __pyx_t_2) < (0)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "(tree fragment)":1
@@ -4601,7 +4366,7 @@ __Pyx_RefNannySetupContext("PyInit_hand", 0);
  *     raise TypeError, "no default __reduce__ due to non-trivial __cinit__"
  * def __setstate_cython__(self, __pyx_state):
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14cribbagehelper_4core_4hand_4hand_4hand_17__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_hand___reduce_cython, NULL, __pyx_mstate_global->__pyx_n_u_cribbagehelper_core_hand_hand, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[2])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14cribbagehelper_4core_4hand_4hand_4Hand_17__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_Hand___reduce_cython, NULL, __pyx_mstate_global->__pyx_n_u_cribbagehelper_core_hand_hand, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[2])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
@@ -4615,7 +4380,7 @@ __Pyx_RefNannySetupContext("PyInit_hand", 0);
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     raise TypeError, "no default __reduce__ due to non-trivial __cinit__"
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14cribbagehelper_4core_4hand_4hand_4hand_19__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_hand___setstate_cython, NULL, __pyx_mstate_global->__pyx_n_u_cribbagehelper_core_hand_hand, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[3])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 3, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14cribbagehelper_4core_4hand_4hand_4Hand_19__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_Hand___setstate_cython, NULL, __pyx_mstate_global->__pyx_n_u_cribbagehelper_core_hand_hand, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[3])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
@@ -4685,102 +4450,39 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
   __Pyx_RefNannyDeclarations
   CYTHON_UNUSED_VAR(__pyx_mstate);
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
-
-  /* "cribbagehelper/core/hand/hand.pyx":72
- * 			rep += "%s of %s" % (
- * 				c.__repr__().split()[-2],
- * 				c.__repr__().split()[-1][:-1])             # <<<<<<<<<<<<<<
- * 		rep += ">"
- * 		return rep
-*/
-  __pyx_mstate_global->__pyx_slice[0] = PySlice_New(Py_None, __pyx_mstate_global->__pyx_int_neg_1, Py_None); if (unlikely(!__pyx_mstate_global->__pyx_slice[0])) __PYX_ERR(0, 72, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_mstate_global->__pyx_slice[0]);
-  __Pyx_GIVEREF(__pyx_mstate_global->__pyx_slice[0]);
-
-  /* "cribbagehelper/core/hand/hand.pyx":78
- * 	def __getitem__(self, index):
- * 		cdef void *ptr = <void *> self.h[0].cards[index]
- * 		c = card(1, 's')             # <<<<<<<<<<<<<<
- * 		free(c.c)
- * 		c.c = <CARD *> ptr
-*/
-  __pyx_mstate_global->__pyx_tuple[0] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_1, __pyx_mstate_global->__pyx_n_u_s); if (unlikely(!__pyx_mstate_global->__pyx_tuple[0])) __PYX_ERR(0, 78, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[0]);
-  __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[0]);
-  #if CYTHON_IMMORTAL_CONSTANTS
-  {
-    PyObject **table = __pyx_mstate->__pyx_tuple;
-    for (Py_ssize_t i=0; i<1; ++i) {
-      #if CYTHON_COMPILING_IN_CPYTHON_FREETHREADING
-      #if PY_VERSION_HEX < 0x030E0000
-      if (_Py_IsOwnedByCurrentThread(table[i]) && Py_REFCNT(table[i]) == 1)
-      #else
-      if (PyUnstable_Object_IsUniquelyReferenced(table[i]))
-      #endif
-      {
-        Py_SET_REFCNT(table[i], _Py_IMMORTAL_REFCNT_LOCAL);
-      }
-      #else
-      Py_SET_REFCNT(table[i], _Py_IMMORTAL_INITIAL_REFCNT);
-      #endif
-    }
-  }
-  #endif
-  #if CYTHON_IMMORTAL_CONSTANTS
-  {
-    PyObject **table = __pyx_mstate->__pyx_slice;
-    for (Py_ssize_t i=0; i<1; ++i) {
-      #if CYTHON_COMPILING_IN_CPYTHON_FREETHREADING
-      #if PY_VERSION_HEX < 0x030E0000
-      if (_Py_IsOwnedByCurrentThread(table[i]) && Py_REFCNT(table[i]) == 1)
-      #else
-      if (PyUnstable_Object_IsUniquelyReferenced(table[i]))
-      #endif
-      {
-        Py_SET_REFCNT(table[i], _Py_IMMORTAL_REFCNT_LOCAL);
-      }
-      #else
-      Py_SET_REFCNT(table[i], _Py_IMMORTAL_INITIAL_REFCNT);
-      #endif
-    }
-  }
-  #endif
   __Pyx_RefNannyFinishContext();
   return 0;
-  __pyx_L1_error:;
-  __Pyx_RefNannyFinishContext();
-  return -1;
 }
 /* #### Code section: init_constants ### */
 
 static int __Pyx_InitConstants(__pyx_mstatetype *__pyx_mstate) {
   CYTHON_UNUSED_VAR(__pyx_mstate);
   {
-    const struct { const unsigned int length: 6; } index[] = {{2},{1},{1},{22},{33},{7},{6},{2},{9},{50},{4},{14},{20},{18},{17},{18},{29},{9},{6},{8},{9},{8},{8},{11},{12},{4},{14},{13},{22},{24},{13},{5},{7},{8},{10},{8},{3},{11},{12},{5},{10},{17},{13},{8},{1},{4},{12},{10},{12},{19},{5},{5},{8},{6},{11},{9},{7}};
-    #if (CYTHON_COMPRESS_STRINGS) == 2 /* compression: bz2 (409 bytes) */
-const char* const cstring = "BZh91AY&SY\274\025\303\340\000\000\020\377\342t0  H\017\200\025\204\001p\000\277\357\377`@@@\000\000@0\001i\2120\323QM=\021\352\032hi\352\003M\006\203F\232{T\0325\024\375\023$\310\000\000\000\003@%5\0044'\246\2110e4\000\000b \020^\251 \303\034\000\327=\227S\353\031=Vj-\260\013\245s\032\ta\252\001\265+\321\342\242\002/\342\210\031\314\340\200\365\365P`\260&_-[\335\\\t\224_8\233\024I\321\306\370\27243\350B\300\020\252\205@*\034\250\022\233f\004\022\313\017\000U\357\357\342\246\3461^\224\233\010\302\346\265\241\311\245F\225\354C\010\363{\314\276\\\357\256\233uD$\300\375X\276t\032<p\241\270\261J\013jC\334\222\265F\246\026\376\231\217\330\325\357\315\026\264_\206%\327Z\253$\247ap\222,7\332\343\226:\240\336\3136uJ\371\275\270f `\225\201\242\362Y6\245\205\254A\3634\345\014'\202\212!\t\026k\3117?\01380!\306.d\354\226n\004\341\367\312\276\353\006+aSI\023\245ZF\031\206\024\016\032\314\247\211\014f\267'1,\037\224\207\032\322/h\220+\247\\2\275% \226\216\330\245X\344qP\2057\316\326}\321LI\325\261\026\330CXbTm\205\234\254\210(\177p\032\360\346<r\245\034%\311\210\224%#5\031\300l\002\211>\213\377Em\013\374]\311\024\341BB\360W\017\200";
-    PyObject *data = __Pyx_DecompressString(cstring, 409, 2);
+    const struct { const unsigned int length: 6; } index[] = {{2},{1},{1},{22},{33},{7},{6},{2},{9},{50},{4},{14},{4},{14},{13},{22},{24},{20},{7},{18},{18},{29},{9},{6},{8},{9},{8},{8},{11},{12},{13},{5},{7},{8},{10},{8},{3},{11},{12},{4},{5},{10},{17},{13},{4},{12},{10},{12},{19},{4},{5},{8},{6},{11},{9},{7}};
+    #if (CYTHON_COMPRESS_STRINGS) == 2 /* compression: bz2 (408 bytes) */
+const char* const cstring = "BZh91AY&SY\313\323\220$\000\000\020\377\342t0  H\017\200\025\204Ap\000\277\357\377`@@@\000\000@0\001l\246\2144SM\014\204z\232\032\000\320\r\014\2156j\203R\237\252g\250521\240\206\021\200\000\232\002SH\010\232mS\365!\352\236\311\020\301\006F\217A\260\020\305\tbHF\017\243\255\302\273\2473\356\214\252\373@\302ibP3\210\354\326\025b.\202\2024\336Z\014\314\276\034b\260\334\267\304a?\237\372\004\304\216\276\253w[s\317w\263\363E!,\361\226q\312p\301\236@\342L\221\004\rE\232\233\216\363[\277\241o\374\375\320JW\000\360\014\330$\244\203\206Z\nr\217\022k\211\224\220\215\253z\235U\362E\362\025\344Xb1\014\365\265\306\217\333\242\347\022\212\244x\272 \351,T\246\302\327\337\221\r\032\232\350\214IB\3271\301L\252\316\206)\"\207\034\034\347xd\217\252\331\234\313]\204I\016\2012\221\361\247\022ax\202\312.\235\301\245A\2230\333fo\241<\3300Ap@\273\023'\273-\234NC\n\323\272\243\024a\026\345\201\276\323\345(\354\033t\006\275'\014\356\\\372+1g\354\351\251\006\3522i\221/Hp0\253\240\257(\310\212;S\351\034\370\357\305\241\302I\212=\030\221\326G\200\\\236\221\257:\310\024~5\033\"\203\344}\364j\023R\32323(2\254\300+h@\277\303\027\301/\t\374]\311\024\341BC/N@\220";
+    PyObject *data = __Pyx_DecompressString(cstring, 408, 2);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #elif (CYTHON_COMPRESS_STRINGS) != 0 /* compression: zlib (345 bytes) */
-const char* const cstring = "x\332mQ=O\3030\020\025\210\005\266\216l\221\030\201vGUY\230\021\360\007N\216sI\255\272v\360\235\253d\353\330\261?\257?\207\263\223\006\020\014\276\217\367\354\347w\366C\261z^\352`\312R5\270F[a\230\257\225\253\236\212\037`\213a\241}\300Ebr\230\267}W\031R\245Et)6\332\320PU\316\027\025\326*Z.\000\002VQ#@QE,\330\027\316\273G\016fg\224\025V\033gXH_\027K\022\3305\344c\320\270\002x\353;Y/F3\274b\307\037\242H\275\323\306\317\305\211\217l\034\222\010XE\004\r\262a\334\246V`0\0168(\215\245\322\233\337S\244\263\230\347\313\001\000\035c\220\324i\3402\307\276\305\224w\312FLD\362\007PG\247S\236n\312%\261b\331\224\244\262\346\244w\356\362\351\261\031_B\367\274\366nB\351\254r\306\301\020L\023\246\273dJ\213\211\200\2552C\366U\264\230*\247\266\222[\337J\220\367\032\375|Fe\007&(\267\241\357O\370cb\002\260\033\232V\314\023\241\255\263\263Q_\252\361C\177\370\205\177\274Sk\rS\224\005\300H\262=?#\355g\247\313\353\303\355\361\356\370\276\2778]\335\034\356\245\310\330\354\013\325\312\373s";
-    PyObject *data = __Pyx_DecompressString(cstring, 345, 1);
+    #elif (CYTHON_COMPRESS_STRINGS) != 0 /* compression: zlib (340 bytes) */
+const char* const cstring = "x\332mQ\261N\0031\014\025\210\005\266\216l\221\030\201\353\216\252\26200!\340\007\254\\\316w\265\232&G\342Tw[\307\216\375\274~\016I\356z\005\301\340g\347\331q\354\227\007\261|^(Ge)\033\\\241\256\320\025+i\252'\361\203l\321\315\225u8O\231\014E\333w\025yYjD\223\260Q\344\207\2502VTX\313\240Y\0008\254\202B\000Q\005\024l\205\261\346\221\035mI\352\230Ud\210c\322\326b\341#m\032o\203S\270|\215o$+\000\3200:\200\323\251K\027\306\303\330\\\365\274\262fb=\262g\311g\036\340\275\357\242\275\220bx\303\216?\261\006\220ZG\360\275Qd\213\270\235\rL\006\275\322\021\201\014\260\223\nK\251\326\277\205H\245\230%\3120\315\207\235\002.3\366-&\277\225:\340ib\200:\030\225|\203L\214\2331\034&\005 \017\323\014)\355\0014\346\3317\222\006o\253\240S)\030\271\211\276\265m\204\270\330\330\342+H=d\2344\353d\376,\377\037\255&\002\273\244\230\256\263nc\353\030\215?\370CM\370GY\037\210\263\0010\372X\235w\366\273\331\361\362z\177{\270;|\354.\216W7\373\373\030dn\366\r\233\346\364E";
+    PyObject *data = __Pyx_DecompressString(cstring, 340, 1);
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #else /* compression: none (640 bytes) */
-const char* const bytes = ", >?<cribbagehelder.hand: cribbagehelper/core/hand/hand.pyxdisableenablegcisenabledno default __reduce__ due to non-trivial __cinit__ of <stringsource>__Pyx_PyDict_NextRefasyncio.coroutines__class_getitem__cline_in_tracebackcribbagehelper.core.hand.hand__enter__exc_tbexc_typeexc_value__exit____func____getitem____getstate__handhand.__enter__hand.__exit__hand.__reduce_cython__hand.__setstate_cython___is_coroutineitems__len____main____module____name__pop__pyx_state__qualname__ranks__reduce____reduce_cython____reduce_ex____repr__sself__set_name__setdefault__setstate____setstate_cython__splitsuits__test__values\200\021\330\002\t\210\031\220#\220Q\200\001\330\004\n\210+\220Q\200\021\330\002\t\210\021";
+    #else /* compression: none (624 bytes) */
+const char* const bytes = ", >?<cribbagehelder.hand: cribbagehelper/core/hand/hand.pyxdisableenablegcisenabledno default __reduce__ due to non-trivial __cinit__ of <stringsource>HandHand.__enter__Hand.__exit__Hand.__reduce_cython__Hand.__setstate_cython____Pyx_PyDict_NextRef__all__asyncio.coroutinescline_in_tracebackcribbagehelper.core.hand.hand__enter__exc_tbexc_typeexc_value__exit____func____getitem____getstate___is_coroutineitems__len____main____module____name__pop__pyx_state__qualname__rankranks__reduce____reduce_cython____reduce_ex__self__set_name__setdefault__setstate____setstate_cython__suitsuits__test__values\200\021\330\002\t\210\031\220#\220Q\200\001\330\004\n\210+\220Q\200\021\330\002\t\210\021";
     PyObject *data = NULL;
     CYTHON_UNUSED_VAR(__Pyx_DecompressString);
     #endif
     PyObject **stringtab = __pyx_mstate->__pyx_string_tab;
     Py_ssize_t pos = 0;
-    for (int i = 0; i < 54; i++) {
+    for (int i = 0; i < 53; i++) {
       Py_ssize_t bytes_length = index[i].length;
       PyObject *string = PyUnicode_DecodeUTF8(bytes + pos, bytes_length, NULL);
       if (likely(string) && i >= 12) PyUnicode_InternInPlace(&string);
@@ -4791,7 +4493,7 @@ const char* const bytes = ", >?<cribbagehelder.hand: cribbagehelper/core/hand/ha
       stringtab[i] = string;
       pos += bytes_length;
     }
-    for (int i = 54; i < 57; i++) {
+    for (int i = 53; i < 56; i++) {
       Py_ssize_t bytes_length = index[i].length;
       PyObject *string = PyBytes_FromStringAndSize(bytes + pos, bytes_length);
       stringtab[i] = string;
@@ -4802,14 +4504,14 @@ const char* const bytes = ", >?<cribbagehelder.hand: cribbagehelper/core/hand/ha
       }
     }
     Py_XDECREF(data);
-    for (Py_ssize_t i = 0; i < 57; i++) {
+    for (Py_ssize_t i = 0; i < 56; i++) {
       if (unlikely(PyObject_Hash(stringtab[i]) == -1)) {
         __PYX_ERR(0, 1, __pyx_L1_error)
       }
     }
     #if CYTHON_IMMORTAL_CONSTANTS
     {
-      PyObject **table = stringtab + 54;
+      PyObject **table = stringtab + 53;
       for (Py_ssize_t i=0; i<3; ++i) {
         #if CYTHON_COMPILING_IN_CPYTHON_FREETHREADING
         #if PY_VERSION_HEX < 0x030E0000
@@ -4827,33 +4529,6 @@ const char* const bytes = ", >?<cribbagehelder.hand: cribbagehelper/core/hand/ha
     }
     #endif
   }
-  {
-    PyObject **numbertab = __pyx_mstate->__pyx_number_tab + 0;
-    int8_t const cint_constants_1[] = {-1,1};
-    for (int i = 0; i < 2; i++) {
-      numbertab[i] = PyLong_FromLong(cint_constants_1[i - 0]);
-      if (unlikely(!numbertab[i])) __PYX_ERR(0, 1, __pyx_L1_error)
-    }
-  }
-  #if CYTHON_IMMORTAL_CONSTANTS
-  {
-    PyObject **table = __pyx_mstate->__pyx_number_tab;
-    for (Py_ssize_t i=0; i<2; ++i) {
-      #if CYTHON_COMPILING_IN_CPYTHON_FREETHREADING
-      #if PY_VERSION_HEX < 0x030E0000
-      if (_Py_IsOwnedByCurrentThread(table[i]) && Py_REFCNT(table[i]) == 1)
-      #else
-      if (PyUnstable_Object_IsUniquelyReferenced(table[i]))
-      #endif
-      {
-        Py_SET_REFCNT(table[i], _Py_IMMORTAL_REFCNT_LOCAL);
-      }
-      #else
-      Py_SET_REFCNT(table[i], _Py_IMMORTAL_INITIAL_REFCNT);
-      #endif
-    }
-  }
-  #endif
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -4882,12 +4557,12 @@ static int __Pyx_CreateCodeObjects(__pyx_mstatetype *__pyx_mstate) {
   PyObject* tuple_dedup_map = PyDict_New();
   if (unlikely(!tuple_dedup_map)) return -1;
   {
-    const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 56};
+    const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 50};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self};
     __pyx_mstate_global->__pyx_codeobj_tab[0] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_cribbagehelper_core_hand_hand_py, __pyx_mstate->__pyx_n_u_enter, __pyx_mstate->__pyx_kp_b_iso88591__4, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[0])) goto bad;
   }
   {
-    const __Pyx_PyCode_New_function_description descr = {4, 0, 0, 4, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 59};
+    const __Pyx_PyCode_New_function_description descr = {4, 0, 0, 4, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 53};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_exc_type, __pyx_mstate->__pyx_n_u_exc_value, __pyx_mstate->__pyx_n_u_exc_tb};
     __pyx_mstate_global->__pyx_codeobj_tab[1] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_cribbagehelper_core_hand_hand_py, __pyx_mstate->__pyx_n_u_exit, __pyx_mstate->__pyx_kp_b_iso88591_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[1])) goto bad;
   }
@@ -6120,423 +5795,66 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, 
     return __Pyx_GetItemInt_Generic(o, PyLong_FromSsize_t(i));
 }
 
-/* PyErrExceptionMatches (used by PyObjectGetAttrStrNoError) */
-#if CYTHON_FAST_THREAD_STATE
-static int __Pyx_PyErr_ExceptionMatchesTuple(PyObject *exc_type, PyObject *tuple) {
-    Py_ssize_t i, n;
-    n = PyTuple_GET_SIZE(tuple);
-    for (i=0; i<n; i++) {
-        if (exc_type == PyTuple_GET_ITEM(tuple, i)) return 1;
+/* UnicodeAsUCS4 (used by object_ord) */
+static void __Pyx_PyUnicode_AsPy_UCS4_error(Py_ssize_t length) {
+    if (likely(length >= 0)) {
+        PyErr_Format(PyExc_ValueError,
+                     "only single character unicode strings can be converted to Py_UCS4, "
+                     "got length %" CYTHON_FORMAT_SSIZE_T "d", length);
     }
-    for (i=0; i<n; i++) {
-        if (__Pyx_PyErr_GivenExceptionMatches(exc_type, PyTuple_GET_ITEM(tuple, i))) return 1;
-    }
-    return 0;
 }
-static CYTHON_INLINE int __Pyx_PyErr_ExceptionMatchesInState(PyThreadState* tstate, PyObject* err) {
-    int result;
-    PyObject *exc_type;
-#if PY_VERSION_HEX >= 0x030C00A6
-    PyObject *current_exception = tstate->current_exception;
-    if (unlikely(!current_exception)) return 0;
-    exc_type = (PyObject*) Py_TYPE(current_exception);
-    if (exc_type == err) return 1;
-#else
-    exc_type = tstate->curexc_type;
-    if (exc_type == err) return 1;
-    if (unlikely(!exc_type)) return 0;
-#endif
-    #if CYTHON_AVOID_BORROWED_REFS
-    Py_INCREF(exc_type);
-    #endif
-    if (unlikely(PyTuple_Check(err))) {
-        result = __Pyx_PyErr_ExceptionMatchesTuple(exc_type, err);
-    } else {
-        result = __Pyx_PyErr_GivenExceptionMatches(exc_type, err);
+static CYTHON_INLINE Py_UCS4 __Pyx_PyUnicode_AsPy_UCS4(PyObject* x) {
+    Py_ssize_t length = __Pyx_PyUnicode_GET_LENGTH(x);
+    if (unlikely(length != 1)) {
+        __Pyx_PyUnicode_AsPy_UCS4_error(length);
+        return (Py_UCS4)-1;
     }
-    #if CYTHON_AVOID_BORROWED_REFS
-    Py_DECREF(exc_type);
-    #endif
-    return result;
-}
-#endif
-
-/* PyErrFetchRestore (used by PyObjectGetAttrStrNoError) */
-#if CYTHON_FAST_THREAD_STATE
-static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
-#if PY_VERSION_HEX >= 0x030C00A6
-    PyObject *tmp_value;
-    assert(type == NULL || (value != NULL && type == (PyObject*) Py_TYPE(value)));
-    if (value) {
-        #if CYTHON_COMPILING_IN_CPYTHON
-        if (unlikely(((PyBaseExceptionObject*) value)->traceback != tb))
-        #endif
-            PyException_SetTraceback(value, tb);
-    }
-    tmp_value = tstate->current_exception;
-    tstate->current_exception = value;
-    Py_XDECREF(tmp_value);
-    Py_XDECREF(type);
-    Py_XDECREF(tb);
-#else
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-    tmp_type = tstate->curexc_type;
-    tmp_value = tstate->curexc_value;
-    tmp_tb = tstate->curexc_traceback;
-    tstate->curexc_type = type;
-    tstate->curexc_value = value;
-    tstate->curexc_traceback = tb;
-    Py_XDECREF(tmp_type);
-    Py_XDECREF(tmp_value);
-    Py_XDECREF(tmp_tb);
-#endif
-}
-static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
-#if PY_VERSION_HEX >= 0x030C00A6
-    PyObject* exc_value;
-    exc_value = tstate->current_exception;
-    tstate->current_exception = 0;
-    *value = exc_value;
-    *type = NULL;
-    *tb = NULL;
-    if (exc_value) {
-        *type = (PyObject*) Py_TYPE(exc_value);
-        Py_INCREF(*type);
-        #if CYTHON_COMPILING_IN_CPYTHON
-        *tb = ((PyBaseExceptionObject*) exc_value)->traceback;
-        Py_XINCREF(*tb);
-        #else
-        *tb = PyException_GetTraceback(exc_value);
-        #endif
-    }
-#else
-    *type = tstate->curexc_type;
-    *value = tstate->curexc_value;
-    *tb = tstate->curexc_traceback;
-    tstate->curexc_type = 0;
-    tstate->curexc_value = 0;
-    tstate->curexc_traceback = 0;
-#endif
-}
-#endif
-
-/* PyObjectGetAttrStrNoError (used by ObjectGetItem) */
-#if __PYX_LIMITED_VERSION_HEX < 0x030d0000
-static void __Pyx_PyObject_GetAttrStr_ClearAttributeError(void) {
-    __Pyx_PyThreadState_declare
-    __Pyx_PyThreadState_assign
-    if (likely(__Pyx_PyErr_ExceptionMatches(PyExc_AttributeError)))
-        __Pyx_PyErr_Clear();
-}
-#endif
-static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStrNoError(PyObject* obj, PyObject* attr_name) {
-    PyObject *result;
-#if __PYX_LIMITED_VERSION_HEX >= 0x030d0000
-    (void) PyObject_GetOptionalAttr(obj, attr_name, &result);
-    return result;
-#else
-#if CYTHON_COMPILING_IN_CPYTHON && CYTHON_USE_TYPE_SLOTS
-    PyTypeObject* tp = Py_TYPE(obj);
-    if (likely(tp->tp_getattro == PyObject_GenericGetAttr)) {
-        return _PyObject_GenericGetAttrWithDict(obj, attr_name, NULL, 1);
-    }
-#endif
-    result = __Pyx_PyObject_GetAttrStr(obj, attr_name);
-    if (unlikely(!result)) {
-        __Pyx_PyObject_GetAttrStr_ClearAttributeError();
-    }
-    return result;
-#endif
+    return __Pyx_PyUnicode_READ_CHAR(x, 0);
 }
 
-/* ObjectGetItem */
-#if CYTHON_USE_TYPE_SLOTS
-static PyObject *__Pyx_PyObject_GetIndex(PyObject *obj, PyObject *index) {
-    PyObject *runerr = NULL;
-    Py_ssize_t key_value;
-    key_value = __Pyx_PyIndex_AsSsize_t(index);
-    if (likely(key_value != -1 || !(runerr = PyErr_Occurred()))) {
-        return __Pyx_GetItemInt_Fast(obj, key_value, 0, 1, 1, 1);
-    }
-    if (PyErr_GivenExceptionMatches(runerr, PyExc_OverflowError)) {
-        __Pyx_TypeName index_type_name = __Pyx_PyType_GetFullyQualifiedName(Py_TYPE(index));
-        PyErr_Clear();
-        PyErr_Format(PyExc_IndexError,
-            "cannot fit '" __Pyx_FMT_TYPENAME "' into an index-sized integer", index_type_name);
-        __Pyx_DECREF_TypeName(index_type_name);
-    }
-    return NULL;
-}
-static PyObject *__Pyx_PyObject_GetItem_Slow(PyObject *obj, PyObject *key) {
-    __Pyx_TypeName obj_type_name;
-    if (likely(PyType_Check(obj))) {
-        PyObject *meth = __Pyx_PyObject_GetAttrStrNoError(obj, __pyx_mstate_global->__pyx_n_u_class_getitem);
-        if (!meth) {
-            PyErr_Clear();
-        } else {
-            PyObject *result = __Pyx_PyObject_CallOneArg(meth, key);
-            Py_DECREF(meth);
-            return result;
+/* object_ord */
+static long __Pyx__PyObject_Ord(PyObject* c) {
+    Py_ssize_t size;
+    if (PyBytes_Check(c)) {
+        size = __Pyx_PyBytes_GET_SIZE(c);
+        if (likely(size == 1)) {
+#if CYTHON_ASSUME_SAFE_MACROS
+            return (unsigned char) PyBytes_AS_STRING(c)[0];
+#else
+            char *data = PyBytes_AsString(c);
+            if (unlikely(!data)) return -1;
+            return (unsigned char) data[0];
+#endif
         }
+#if !CYTHON_ASSUME_SAFE_SIZE
+        else if (unlikely(size < 0)) return -1;
+#endif
+    } else if (PyByteArray_Check(c)) {
+        size = __Pyx_PyByteArray_GET_SIZE(c);
+        if (likely(size == 1)) {
+#if CYTHON_ASSUME_SAFE_MACROS
+            return (unsigned char) PyByteArray_AS_STRING(c)[0];
+#else
+            char *data = PyByteArray_AsString(c);
+            if (unlikely(!data)) return -1;
+            return (unsigned char) data[0];
+#endif
+        }
+#if !CYTHON_ASSUME_SAFE_SIZE
+        else if (unlikely(size < 0)) return -1;
+#endif
+    } else {
+        __Pyx_TypeName c_type_name = __Pyx_PyType_GetFullyQualifiedName(Py_TYPE(c));
+        PyErr_Format(PyExc_TypeError,
+            "ord() expected string of length 1, but " __Pyx_FMT_TYPENAME " found",
+            c_type_name);
+        __Pyx_DECREF_TypeName(c_type_name);
+        return (long)(Py_UCS4)-1;
     }
-    obj_type_name = __Pyx_PyType_GetFullyQualifiedName(Py_TYPE(obj));
     PyErr_Format(PyExc_TypeError,
-        "'" __Pyx_FMT_TYPENAME "' object is not subscriptable", obj_type_name);
-    __Pyx_DECREF_TypeName(obj_type_name);
-    return NULL;
+        "ord() expected a character, but string of length %zd found", size);
+    return (long)(Py_UCS4)-1;
 }
-static PyObject *__Pyx_PyObject_GetItem(PyObject *obj, PyObject *key) {
-    PyTypeObject *tp = Py_TYPE(obj);
-    PyMappingMethods *mm = tp->tp_as_mapping;
-    PySequenceMethods *sm = tp->tp_as_sequence;
-    if (likely(mm && mm->mp_subscript)) {
-        return mm->mp_subscript(obj, key);
-    }
-    if (likely(sm && sm->sq_item)) {
-        return __Pyx_PyObject_GetIndex(obj, key);
-    }
-    return __Pyx_PyObject_GetItem_Slow(obj, key);
-}
-#endif
-
-/* GetException */
-#if CYTHON_FAST_THREAD_STATE
-static int __Pyx__GetException(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb)
-#else
-static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb)
-#endif
-{
-    PyObject *local_type = NULL, *local_value, *local_tb = NULL;
-#if CYTHON_FAST_THREAD_STATE
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-  #if PY_VERSION_HEX >= 0x030C0000
-    local_value = tstate->current_exception;
-    tstate->current_exception = 0;
-  #else
-    local_type = tstate->curexc_type;
-    local_value = tstate->curexc_value;
-    local_tb = tstate->curexc_traceback;
-    tstate->curexc_type = 0;
-    tstate->curexc_value = 0;
-    tstate->curexc_traceback = 0;
-  #endif
-#elif __PYX_LIMITED_VERSION_HEX > 0x030C0000
-    local_value = PyErr_GetRaisedException();
-#else
-    PyErr_Fetch(&local_type, &local_value, &local_tb);
-#endif
-#if __PYX_LIMITED_VERSION_HEX > 0x030C0000
-    if (likely(local_value)) {
-        local_type = (PyObject*) Py_TYPE(local_value);
-        Py_INCREF(local_type);
-        local_tb = PyException_GetTraceback(local_value);
-    }
-#else
-    PyErr_NormalizeException(&local_type, &local_value, &local_tb);
-#if CYTHON_FAST_THREAD_STATE
-    if (unlikely(tstate->curexc_type))
-#else
-    if (unlikely(PyErr_Occurred()))
-#endif
-        goto bad;
-    if (local_tb) {
-        if (unlikely(PyException_SetTraceback(local_value, local_tb) < 0))
-            goto bad;
-    }
-#endif // __PYX_LIMITED_VERSION_HEX > 0x030C0000
-    Py_XINCREF(local_tb);
-    Py_XINCREF(local_type);
-    Py_XINCREF(local_value);
-    *type = local_type;
-    *value = local_value;
-    *tb = local_tb;
-#if CYTHON_FAST_THREAD_STATE
-    #if CYTHON_USE_EXC_INFO_STACK
-    {
-        _PyErr_StackItem *exc_info = tstate->exc_info;
-      #if PY_VERSION_HEX >= 0x030B00a4
-        tmp_value = exc_info->exc_value;
-        exc_info->exc_value = local_value;
-        tmp_type = NULL;
-        tmp_tb = NULL;
-        Py_XDECREF(local_type);
-        Py_XDECREF(local_tb);
-      #else
-        tmp_type = exc_info->exc_type;
-        tmp_value = exc_info->exc_value;
-        tmp_tb = exc_info->exc_traceback;
-        exc_info->exc_type = local_type;
-        exc_info->exc_value = local_value;
-        exc_info->exc_traceback = local_tb;
-      #endif
-    }
-    #else
-    tmp_type = tstate->exc_type;
-    tmp_value = tstate->exc_value;
-    tmp_tb = tstate->exc_traceback;
-    tstate->exc_type = local_type;
-    tstate->exc_value = local_value;
-    tstate->exc_traceback = local_tb;
-    #endif
-    Py_XDECREF(tmp_type);
-    Py_XDECREF(tmp_value);
-    Py_XDECREF(tmp_tb);
-#elif __PYX_LIMITED_VERSION_HEX >= 0x030b0000
-    PyErr_SetHandledException(local_value);
-    Py_XDECREF(local_value);
-    Py_XDECREF(local_type);
-    Py_XDECREF(local_tb);
-#else
-    PyErr_SetExcInfo(local_type, local_value, local_tb);
-#endif
-    return 0;
-#if __PYX_LIMITED_VERSION_HEX <= 0x030C0000
-bad:
-    *type = 0;
-    *value = 0;
-    *tb = 0;
-    Py_XDECREF(local_type);
-    Py_XDECREF(local_value);
-    Py_XDECREF(local_tb);
-    return -1;
-#endif
-}
-
-/* SwapException */
-#if CYTHON_FAST_THREAD_STATE
-static CYTHON_INLINE void __Pyx__ExceptionSwap(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-  #if CYTHON_USE_EXC_INFO_STACK && PY_VERSION_HEX >= 0x030B00a4
-    _PyErr_StackItem *exc_info = tstate->exc_info;
-    tmp_value = exc_info->exc_value;
-    exc_info->exc_value = *value;
-    if (tmp_value == NULL || tmp_value == Py_None) {
-        Py_XDECREF(tmp_value);
-        tmp_value = NULL;
-        tmp_type = NULL;
-        tmp_tb = NULL;
-    } else {
-        tmp_type = (PyObject*) Py_TYPE(tmp_value);
-        Py_INCREF(tmp_type);
-        #if CYTHON_COMPILING_IN_CPYTHON
-        tmp_tb = ((PyBaseExceptionObject*) tmp_value)->traceback;
-        Py_XINCREF(tmp_tb);
-        #else
-        tmp_tb = PyException_GetTraceback(tmp_value);
-        #endif
-    }
-  #elif CYTHON_USE_EXC_INFO_STACK
-    _PyErr_StackItem *exc_info = tstate->exc_info;
-    tmp_type = exc_info->exc_type;
-    tmp_value = exc_info->exc_value;
-    tmp_tb = exc_info->exc_traceback;
-    exc_info->exc_type = *type;
-    exc_info->exc_value = *value;
-    exc_info->exc_traceback = *tb;
-  #else
-    tmp_type = tstate->exc_type;
-    tmp_value = tstate->exc_value;
-    tmp_tb = tstate->exc_traceback;
-    tstate->exc_type = *type;
-    tstate->exc_value = *value;
-    tstate->exc_traceback = *tb;
-  #endif
-    *type = tmp_type;
-    *value = tmp_value;
-    *tb = tmp_tb;
-}
-#else
-static CYTHON_INLINE void __Pyx_ExceptionSwap(PyObject **type, PyObject **value, PyObject **tb) {
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-    PyErr_GetExcInfo(&tmp_type, &tmp_value, &tmp_tb);
-    PyErr_SetExcInfo(*type, *value, *tb);
-    *type = tmp_type;
-    *value = tmp_value;
-    *tb = tmp_tb;
-}
-#endif
-
-/* GetTopmostException (used by SaveResetException) */
-#if CYTHON_USE_EXC_INFO_STACK && CYTHON_FAST_THREAD_STATE
-static _PyErr_StackItem *
-__Pyx_PyErr_GetTopmostException(PyThreadState *tstate)
-{
-    _PyErr_StackItem *exc_info = tstate->exc_info;
-    while ((exc_info->exc_value == NULL || exc_info->exc_value == Py_None) &&
-           exc_info->previous_item != NULL)
-    {
-        exc_info = exc_info->previous_item;
-    }
-    return exc_info;
-}
-#endif
-
-/* SaveResetException */
-#if CYTHON_FAST_THREAD_STATE
-static CYTHON_INLINE void __Pyx__ExceptionSave(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
-  #if CYTHON_USE_EXC_INFO_STACK && PY_VERSION_HEX >= 0x030B00a4
-    _PyErr_StackItem *exc_info = __Pyx_PyErr_GetTopmostException(tstate);
-    PyObject *exc_value = exc_info->exc_value;
-    if (exc_value == NULL || exc_value == Py_None) {
-        *value = NULL;
-        *type = NULL;
-        *tb = NULL;
-    } else {
-        *value = exc_value;
-        Py_INCREF(*value);
-        *type = (PyObject*) Py_TYPE(exc_value);
-        Py_INCREF(*type);
-        *tb = PyException_GetTraceback(exc_value);
-    }
-  #elif CYTHON_USE_EXC_INFO_STACK
-    _PyErr_StackItem *exc_info = __Pyx_PyErr_GetTopmostException(tstate);
-    *type = exc_info->exc_type;
-    *value = exc_info->exc_value;
-    *tb = exc_info->exc_traceback;
-    Py_XINCREF(*type);
-    Py_XINCREF(*value);
-    Py_XINCREF(*tb);
-  #else
-    *type = tstate->exc_type;
-    *value = tstate->exc_value;
-    *tb = tstate->exc_traceback;
-    Py_XINCREF(*type);
-    Py_XINCREF(*value);
-    Py_XINCREF(*tb);
-  #endif
-}
-static CYTHON_INLINE void __Pyx__ExceptionReset(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
-  #if CYTHON_USE_EXC_INFO_STACK && PY_VERSION_HEX >= 0x030B00a4
-    _PyErr_StackItem *exc_info = tstate->exc_info;
-    PyObject *tmp_value = exc_info->exc_value;
-    exc_info->exc_value = value;
-    Py_XDECREF(tmp_value);
-    Py_XDECREF(type);
-    Py_XDECREF(tb);
-  #else
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-    #if CYTHON_USE_EXC_INFO_STACK
-    _PyErr_StackItem *exc_info = tstate->exc_info;
-    tmp_type = exc_info->exc_type;
-    tmp_value = exc_info->exc_value;
-    tmp_tb = exc_info->exc_traceback;
-    exc_info->exc_type = type;
-    exc_info->exc_value = value;
-    exc_info->exc_traceback = tb;
-    #else
-    tmp_type = tstate->exc_type;
-    tmp_value = tstate->exc_value;
-    tmp_tb = tstate->exc_traceback;
-    tstate->exc_type = type;
-    tstate->exc_value = value;
-    tstate->exc_traceback = tb;
-    #endif
-    Py_XDECREF(tmp_type);
-    Py_XDECREF(tmp_value);
-    Py_XDECREF(tmp_tb);
-  #endif
-}
-#endif
 
 /* RejectKeywords */
 static void __Pyx_RejectKeywords(const char* function_name, PyObject *kwds) {
@@ -6646,12 +5964,6 @@ static CYTHON_INLINE PyObject *__Pyx_PyUnicode_ConcatInPlaceImpl(PyObject **p_le
   }
 #endif
 
-/* PyObjectCallNoArg */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
-    PyObject *arg[2] = {NULL, NULL};
-    return __Pyx_PyObject_FastCall(func, arg + 1, 0 | __Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET);
-}
-
 /* PyObjectFormatAndDecref */
 static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatSimpleAndDecref(PyObject* s, PyObject* f) {
     if (unlikely(!s)) return NULL;
@@ -6664,68 +5976,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatAndDecref(PyObject* s, PyObj
     result = PyObject_Format(s, f);
     Py_DECREF(s);
     return result;
-}
-
-/* SliceObject */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(PyObject* obj,
-        Py_ssize_t cstart, Py_ssize_t cstop,
-        PyObject** _py_start, PyObject** _py_stop, PyObject** _py_slice,
-        int has_cstart, int has_cstop, CYTHON_UNUSED int wraparound) {
-    __Pyx_TypeName obj_type_name;
-#if CYTHON_USE_TYPE_SLOTS
-    PyMappingMethods* mp = Py_TYPE(obj)->tp_as_mapping;
-    if (likely(mp && mp->mp_subscript))
-#endif
-    {
-        PyObject* result;
-        PyObject *py_slice, *py_start, *py_stop;
-        if (_py_slice) {
-            py_slice = *_py_slice;
-        } else {
-            PyObject* owned_start = NULL;
-            PyObject* owned_stop = NULL;
-            if (_py_start) {
-                py_start = *_py_start;
-            } else {
-                if (has_cstart) {
-                    owned_start = py_start = PyLong_FromSsize_t(cstart);
-                    if (unlikely(!py_start)) goto bad;
-                } else
-                    py_start = Py_None;
-            }
-            if (_py_stop) {
-                py_stop = *_py_stop;
-            } else {
-                if (has_cstop) {
-                    owned_stop = py_stop = PyLong_FromSsize_t(cstop);
-                    if (unlikely(!py_stop)) {
-                        Py_XDECREF(owned_start);
-                        goto bad;
-                    }
-                } else
-                    py_stop = Py_None;
-            }
-            py_slice = PySlice_New(py_start, py_stop, Py_None);
-            Py_XDECREF(owned_start);
-            Py_XDECREF(owned_stop);
-            if (unlikely(!py_slice)) goto bad;
-        }
-#if CYTHON_USE_TYPE_SLOTS
-        result = mp->mp_subscript(obj, py_slice);
-#else
-        result = PyObject_GetItem(obj, py_slice);
-#endif
-        if (!_py_slice) {
-            Py_DECREF(py_slice);
-        }
-        return result;
-    }
-    obj_type_name = __Pyx_PyType_GetFullyQualifiedName(Py_TYPE(obj));
-    PyErr_Format(PyExc_TypeError,
-        "'" __Pyx_FMT_TYPENAME "' object is unsliceable", obj_type_name);
-    __Pyx_DECREF_TypeName(obj_type_name);
-bad:
-    return NULL;
 }
 
 /* JoinPyUnicode */
@@ -6805,6 +6055,65 @@ bad:
     return result;
 #endif
 }
+
+/* PyErrFetchRestore (used by RaiseException) */
+#if CYTHON_FAST_THREAD_STATE
+static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
+#if PY_VERSION_HEX >= 0x030C00A6
+    PyObject *tmp_value;
+    assert(type == NULL || (value != NULL && type == (PyObject*) Py_TYPE(value)));
+    if (value) {
+        #if CYTHON_COMPILING_IN_CPYTHON
+        if (unlikely(((PyBaseExceptionObject*) value)->traceback != tb))
+        #endif
+            PyException_SetTraceback(value, tb);
+    }
+    tmp_value = tstate->current_exception;
+    tstate->current_exception = value;
+    Py_XDECREF(tmp_value);
+    Py_XDECREF(type);
+    Py_XDECREF(tb);
+#else
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+    tmp_type = tstate->curexc_type;
+    tmp_value = tstate->curexc_value;
+    tmp_tb = tstate->curexc_traceback;
+    tstate->curexc_type = type;
+    tstate->curexc_value = value;
+    tstate->curexc_traceback = tb;
+    Py_XDECREF(tmp_type);
+    Py_XDECREF(tmp_value);
+    Py_XDECREF(tmp_tb);
+#endif
+}
+static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
+#if PY_VERSION_HEX >= 0x030C00A6
+    PyObject* exc_value;
+    exc_value = tstate->current_exception;
+    tstate->current_exception = 0;
+    *value = exc_value;
+    *type = NULL;
+    *tb = NULL;
+    if (exc_value) {
+        *type = (PyObject*) Py_TYPE(exc_value);
+        Py_INCREF(*type);
+        #if CYTHON_COMPILING_IN_CPYTHON
+        *tb = ((PyBaseExceptionObject*) exc_value)->traceback;
+        Py_XINCREF(*tb);
+        #else
+        *tb = PyException_GetTraceback(exc_value);
+        #endif
+    }
+#else
+    *type = tstate->curexc_type;
+    *value = tstate->curexc_value;
+    *tb = tstate->curexc_traceback;
+    tstate->curexc_type = 0;
+    tstate->curexc_value = 0;
+    tstate->curexc_traceback = 0;
+#endif
+}
+#endif
 
 /* RaiseException */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause) {
@@ -7093,6 +6402,12 @@ static int __Pyx_fix_up_extension_type_from_spec(PyType_Spec *spec, PyTypeObject
         PyType_Modified(type);
 #endif  // PY_VERSION_HEX > 0x030900B1
     return 0;
+}
+
+/* PyObjectCallNoArg (used by PyObjectCallMethod0) */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
+    PyObject *arg[2] = {NULL, NULL};
+    return __Pyx_PyObject_FastCall(func, arg + 1, 0 | __Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET);
 }
 
 /* PyObjectGetMethod (used by PyObjectCallMethod0) */
@@ -7395,6 +6710,76 @@ static int __Pyx__DelItemOnTypeDict(PyTypeObject *tp, PyObject *k) {
     return result;
 }
 
+/* PyErrExceptionMatches (used by PyObjectGetAttrStrNoError) */
+#if CYTHON_FAST_THREAD_STATE
+static int __Pyx_PyErr_ExceptionMatchesTuple(PyObject *exc_type, PyObject *tuple) {
+    Py_ssize_t i, n;
+    n = PyTuple_GET_SIZE(tuple);
+    for (i=0; i<n; i++) {
+        if (exc_type == PyTuple_GET_ITEM(tuple, i)) return 1;
+    }
+    for (i=0; i<n; i++) {
+        if (__Pyx_PyErr_GivenExceptionMatches(exc_type, PyTuple_GET_ITEM(tuple, i))) return 1;
+    }
+    return 0;
+}
+static CYTHON_INLINE int __Pyx_PyErr_ExceptionMatchesInState(PyThreadState* tstate, PyObject* err) {
+    int result;
+    PyObject *exc_type;
+#if PY_VERSION_HEX >= 0x030C00A6
+    PyObject *current_exception = tstate->current_exception;
+    if (unlikely(!current_exception)) return 0;
+    exc_type = (PyObject*) Py_TYPE(current_exception);
+    if (exc_type == err) return 1;
+#else
+    exc_type = tstate->curexc_type;
+    if (exc_type == err) return 1;
+    if (unlikely(!exc_type)) return 0;
+#endif
+    #if CYTHON_AVOID_BORROWED_REFS
+    Py_INCREF(exc_type);
+    #endif
+    if (unlikely(PyTuple_Check(err))) {
+        result = __Pyx_PyErr_ExceptionMatchesTuple(exc_type, err);
+    } else {
+        result = __Pyx_PyErr_GivenExceptionMatches(exc_type, err);
+    }
+    #if CYTHON_AVOID_BORROWED_REFS
+    Py_DECREF(exc_type);
+    #endif
+    return result;
+}
+#endif
+
+/* PyObjectGetAttrStrNoError (used by SetupReduce) */
+#if __PYX_LIMITED_VERSION_HEX < 0x030d0000
+static void __Pyx_PyObject_GetAttrStr_ClearAttributeError(void) {
+    __Pyx_PyThreadState_declare
+    __Pyx_PyThreadState_assign
+    if (likely(__Pyx_PyErr_ExceptionMatches(PyExc_AttributeError)))
+        __Pyx_PyErr_Clear();
+}
+#endif
+static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStrNoError(PyObject* obj, PyObject* attr_name) {
+    PyObject *result;
+#if __PYX_LIMITED_VERSION_HEX >= 0x030d0000
+    (void) PyObject_GetOptionalAttr(obj, attr_name, &result);
+    return result;
+#else
+#if CYTHON_COMPILING_IN_CPYTHON && CYTHON_USE_TYPE_SLOTS
+    PyTypeObject* tp = Py_TYPE(obj);
+    if (likely(tp->tp_getattro == PyObject_GenericGetAttr)) {
+        return _PyObject_GenericGetAttrWithDict(obj, attr_name, NULL, 1);
+    }
+#endif
+    result = __Pyx_PyObject_GetAttrStr(obj, attr_name);
+    if (unlikely(!result)) {
+        __Pyx_PyObject_GetAttrStr_ClearAttributeError();
+    }
+    return result;
+#endif
+}
+
 /* SetupReduce */
 static int __Pyx_setup_reduce_is_named(PyObject* meth, PyObject* name) {
   int ret;
@@ -7586,6 +6971,25 @@ bad:
     return NULL;
 }
 #endif
+
+/* ListPack */
+static PyObject *__Pyx_PyList_Pack(Py_ssize_t n, ...) {
+    va_list va;
+    PyObject *l = PyList_New(n);
+    va_start(va, n);
+    if (unlikely(!l)) goto end;
+    for (Py_ssize_t i=0; i<n; ++i) {
+        PyObject *arg = va_arg(va, PyObject*);
+        Py_INCREF(arg);
+        if (__Pyx_PyList_SET_ITEM(l, i, arg) != (0)) {
+            Py_CLEAR(l);
+            goto end;
+        }
+    }
+    end:
+    va_end(va);
+    return l;
+}
 
 /* dict_setdefault (used by FetchCommonType) */
 static CYTHON_INLINE PyObject *__Pyx_PyDict_SetDefault(PyObject *d, PyObject *key, PyObject *default_value) {
@@ -9310,256 +8714,6 @@ bad:
     }
 
 /* CIntFromPy */
-static CYTHON_INLINE size_t __Pyx_PyLong_As_size_t(PyObject *x) {
-#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif
-    const size_t neg_one = (size_t) -1, const_zero = (size_t) 0;
-#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
-#pragma GCC diagnostic pop
-#endif
-    const int is_unsigned = neg_one > const_zero;
-    if (unlikely(!PyLong_Check(x))) {
-        size_t val;
-        PyObject *tmp = __Pyx_PyNumber_Long(x);
-        if (!tmp) return (size_t) -1;
-        val = __Pyx_PyLong_As_size_t(tmp);
-        Py_DECREF(tmp);
-        return val;
-    }
-    if (is_unsigned) {
-#if CYTHON_USE_PYLONG_INTERNALS
-        if (unlikely(__Pyx_PyLong_IsNeg(x))) {
-            goto raise_neg_overflow;
-        } else if (__Pyx_PyLong_IsCompact(x)) {
-            __PYX_VERIFY_RETURN_INT(size_t, __Pyx_compact_upylong, __Pyx_PyLong_CompactValueUnsigned(x))
-        } else {
-            const digit* digits = __Pyx_PyLong_Digits(x);
-            assert(__Pyx_PyLong_DigitCount(x) > 1);
-            switch (__Pyx_PyLong_DigitCount(x)) {
-                case 2:
-                    if ((8 * sizeof(size_t) > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(size_t) >= 2 * PyLong_SHIFT)) {
-                            return (size_t) (((((size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
-                        }
-                    }
-                    break;
-                case 3:
-                    if ((8 * sizeof(size_t) > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(size_t) >= 3 * PyLong_SHIFT)) {
-                            return (size_t) (((((((size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
-                        }
-                    }
-                    break;
-                case 4:
-                    if ((8 * sizeof(size_t) > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(size_t) >= 4 * PyLong_SHIFT)) {
-                            return (size_t) (((((((((size_t)digits[3]) << PyLong_SHIFT) | (size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
-                        }
-                    }
-                    break;
-            }
-        }
-#endif
-#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX < 0x030C00A7
-        if (unlikely(Py_SIZE(x) < 0)) {
-            goto raise_neg_overflow;
-        }
-#else
-        {
-            int result = PyObject_RichCompareBool(x, Py_False, Py_LT);
-            if (unlikely(result < 0))
-                return (size_t) -1;
-            if (unlikely(result == 1))
-                goto raise_neg_overflow;
-        }
-#endif
-        if ((sizeof(size_t) <= sizeof(unsigned long))) {
-            __PYX_VERIFY_RETURN_INT_EXC(size_t, unsigned long, PyLong_AsUnsignedLong(x))
-        } else if ((sizeof(size_t) <= sizeof(unsigned PY_LONG_LONG))) {
-            __PYX_VERIFY_RETURN_INT_EXC(size_t, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
-        }
-    } else {
-#if CYTHON_USE_PYLONG_INTERNALS
-        if (__Pyx_PyLong_IsCompact(x)) {
-            __PYX_VERIFY_RETURN_INT(size_t, __Pyx_compact_pylong, __Pyx_PyLong_CompactValue(x))
-        } else {
-            const digit* digits = __Pyx_PyLong_Digits(x);
-            assert(__Pyx_PyLong_DigitCount(x) > 1);
-            switch (__Pyx_PyLong_SignedDigitCount(x)) {
-                case -2:
-                    if ((8 * sizeof(size_t) - 1 > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(size_t, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(size_t) - 1 > 2 * PyLong_SHIFT)) {
-                            return (size_t) (((size_t)-1)*(((((size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 2:
-                    if ((8 * sizeof(size_t) > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(size_t) - 1 > 2 * PyLong_SHIFT)) {
-                            return (size_t) ((((((size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-                case -3:
-                    if ((8 * sizeof(size_t) - 1 > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(size_t, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(size_t) - 1 > 3 * PyLong_SHIFT)) {
-                            return (size_t) (((size_t)-1)*(((((((size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 3:
-                    if ((8 * sizeof(size_t) > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(size_t) - 1 > 3 * PyLong_SHIFT)) {
-                            return (size_t) ((((((((size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-                case -4:
-                    if ((8 * sizeof(size_t) - 1 > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(size_t, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(size_t) - 1 > 4 * PyLong_SHIFT)) {
-                            return (size_t) (((size_t)-1)*(((((((((size_t)digits[3]) << PyLong_SHIFT) | (size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 4:
-                    if ((8 * sizeof(size_t) > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(size_t) - 1 > 4 * PyLong_SHIFT)) {
-                            return (size_t) ((((((((((size_t)digits[3]) << PyLong_SHIFT) | (size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-            }
-        }
-#endif
-        if ((sizeof(size_t) <= sizeof(long))) {
-            __PYX_VERIFY_RETURN_INT_EXC(size_t, long, PyLong_AsLong(x))
-        } else if ((sizeof(size_t) <= sizeof(PY_LONG_LONG))) {
-            __PYX_VERIFY_RETURN_INT_EXC(size_t, PY_LONG_LONG, PyLong_AsLongLong(x))
-        }
-    }
-    {
-        size_t val;
-        int ret = -1;
-#if PY_VERSION_HEX >= 0x030d00A6 && !CYTHON_COMPILING_IN_LIMITED_API
-        Py_ssize_t bytes_copied = PyLong_AsNativeBytes(
-            x, &val, sizeof(val), Py_ASNATIVEBYTES_NATIVE_ENDIAN | (is_unsigned ? Py_ASNATIVEBYTES_UNSIGNED_BUFFER | Py_ASNATIVEBYTES_REJECT_NEGATIVE : 0));
-        if (unlikely(bytes_copied == -1)) {
-        } else if (unlikely(bytes_copied > (Py_ssize_t) sizeof(val))) {
-            goto raise_overflow;
-        } else {
-            ret = 0;
-        }
-#elif PY_VERSION_HEX < 0x030d0000 && !(CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) || defined(_PyLong_AsByteArray)
-        int one = 1; int is_little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&val;
-        ret = _PyLong_AsByteArray((PyLongObject *)x,
-                                    bytes, sizeof(val),
-                                    is_little, !is_unsigned);
-#else
-        PyObject *v;
-        PyObject *stepval = NULL, *mask = NULL, *shift = NULL;
-        int bits, remaining_bits, is_negative = 0;
-        int chunk_size = (sizeof(long) < 8) ? 30 : 62;
-        if (likely(PyLong_CheckExact(x))) {
-            v = __Pyx_NewRef(x);
-        } else {
-            v = PyNumber_Long(x);
-            if (unlikely(!v)) return (size_t) -1;
-            assert(PyLong_CheckExact(v));
-        }
-        {
-            int result = PyObject_RichCompareBool(v, Py_False, Py_LT);
-            if (unlikely(result < 0)) {
-                Py_DECREF(v);
-                return (size_t) -1;
-            }
-            is_negative = result == 1;
-        }
-        if (is_unsigned && unlikely(is_negative)) {
-            Py_DECREF(v);
-            goto raise_neg_overflow;
-        } else if (is_negative) {
-            stepval = PyNumber_Invert(v);
-            Py_DECREF(v);
-            if (unlikely(!stepval))
-                return (size_t) -1;
-        } else {
-            stepval = v;
-        }
-        v = NULL;
-        val = (size_t) 0;
-        mask = PyLong_FromLong((1L << chunk_size) - 1); if (unlikely(!mask)) goto done;
-        shift = PyLong_FromLong(chunk_size); if (unlikely(!shift)) goto done;
-        for (bits = 0; bits < (int) sizeof(size_t) * 8 - chunk_size; bits += chunk_size) {
-            PyObject *tmp, *digit;
-            long idigit;
-            digit = PyNumber_And(stepval, mask);
-            if (unlikely(!digit)) goto done;
-            idigit = PyLong_AsLong(digit);
-            Py_DECREF(digit);
-            if (unlikely(idigit < 0)) goto done;
-            val |= ((size_t) idigit) << bits;
-            tmp = PyNumber_Rshift(stepval, shift);
-            if (unlikely(!tmp)) goto done;
-            Py_DECREF(stepval); stepval = tmp;
-        }
-        Py_DECREF(shift); shift = NULL;
-        Py_DECREF(mask); mask = NULL;
-        {
-            long idigit = PyLong_AsLong(stepval);
-            if (unlikely(idigit < 0)) goto done;
-            remaining_bits = ((int) sizeof(size_t) * 8) - bits - (is_unsigned ? 0 : 1);
-            if (unlikely(idigit >= (1L << remaining_bits)))
-                goto raise_overflow;
-            val |= ((size_t) idigit) << bits;
-        }
-        if (!is_unsigned) {
-            if (unlikely(val & (((size_t) 1) << (sizeof(size_t) * 8 - 1))))
-                goto raise_overflow;
-            if (is_negative)
-                val = ~val;
-        }
-        ret = 0;
-    done:
-        Py_XDECREF(shift);
-        Py_XDECREF(mask);
-        Py_XDECREF(stepval);
-#endif
-        if (unlikely(ret))
-            return (size_t) -1;
-        return val;
-    }
-raise_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "value too large to convert to size_t");
-    return (size_t) -1;
-raise_neg_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "can't convert negative value to size_t");
-    return (size_t) -1;
-}
-
-/* CIntFromPy */
 static CYTHON_INLINE unsigned short __Pyx_PyLong_As_unsigned_short(PyObject *x) {
 #ifdef __Pyx_HAS_GCC_DIAGNOSTIC
 #pragma GCC diagnostic push
@@ -9809,256 +8963,6 @@ raise_neg_overflow:
     return (unsigned short) -1;
 }
 
-/* CIntFromPy */
-static CYTHON_INLINE char __Pyx_PyLong_As_char(PyObject *x) {
-#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif
-    const char neg_one = (char) -1, const_zero = (char) 0;
-#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
-#pragma GCC diagnostic pop
-#endif
-    const int is_unsigned = neg_one > const_zero;
-    if (unlikely(!PyLong_Check(x))) {
-        char val;
-        PyObject *tmp = __Pyx_PyNumber_Long(x);
-        if (!tmp) return (char) -1;
-        val = __Pyx_PyLong_As_char(tmp);
-        Py_DECREF(tmp);
-        return val;
-    }
-    if (is_unsigned) {
-#if CYTHON_USE_PYLONG_INTERNALS
-        if (unlikely(__Pyx_PyLong_IsNeg(x))) {
-            goto raise_neg_overflow;
-        } else if (__Pyx_PyLong_IsCompact(x)) {
-            __PYX_VERIFY_RETURN_INT(char, __Pyx_compact_upylong, __Pyx_PyLong_CompactValueUnsigned(x))
-        } else {
-            const digit* digits = __Pyx_PyLong_Digits(x);
-            assert(__Pyx_PyLong_DigitCount(x) > 1);
-            switch (__Pyx_PyLong_DigitCount(x)) {
-                case 2:
-                    if ((8 * sizeof(char) > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(char, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(char) >= 2 * PyLong_SHIFT)) {
-                            return (char) (((((char)digits[1]) << PyLong_SHIFT) | (char)digits[0]));
-                        }
-                    }
-                    break;
-                case 3:
-                    if ((8 * sizeof(char) > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(char, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(char) >= 3 * PyLong_SHIFT)) {
-                            return (char) (((((((char)digits[2]) << PyLong_SHIFT) | (char)digits[1]) << PyLong_SHIFT) | (char)digits[0]));
-                        }
-                    }
-                    break;
-                case 4:
-                    if ((8 * sizeof(char) > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(char, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(char) >= 4 * PyLong_SHIFT)) {
-                            return (char) (((((((((char)digits[3]) << PyLong_SHIFT) | (char)digits[2]) << PyLong_SHIFT) | (char)digits[1]) << PyLong_SHIFT) | (char)digits[0]));
-                        }
-                    }
-                    break;
-            }
-        }
-#endif
-#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX < 0x030C00A7
-        if (unlikely(Py_SIZE(x) < 0)) {
-            goto raise_neg_overflow;
-        }
-#else
-        {
-            int result = PyObject_RichCompareBool(x, Py_False, Py_LT);
-            if (unlikely(result < 0))
-                return (char) -1;
-            if (unlikely(result == 1))
-                goto raise_neg_overflow;
-        }
-#endif
-        if ((sizeof(char) <= sizeof(unsigned long))) {
-            __PYX_VERIFY_RETURN_INT_EXC(char, unsigned long, PyLong_AsUnsignedLong(x))
-        } else if ((sizeof(char) <= sizeof(unsigned PY_LONG_LONG))) {
-            __PYX_VERIFY_RETURN_INT_EXC(char, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
-        }
-    } else {
-#if CYTHON_USE_PYLONG_INTERNALS
-        if (__Pyx_PyLong_IsCompact(x)) {
-            __PYX_VERIFY_RETURN_INT(char, __Pyx_compact_pylong, __Pyx_PyLong_CompactValue(x))
-        } else {
-            const digit* digits = __Pyx_PyLong_Digits(x);
-            assert(__Pyx_PyLong_DigitCount(x) > 1);
-            switch (__Pyx_PyLong_SignedDigitCount(x)) {
-                case -2:
-                    if ((8 * sizeof(char) - 1 > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(char, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(char) - 1 > 2 * PyLong_SHIFT)) {
-                            return (char) (((char)-1)*(((((char)digits[1]) << PyLong_SHIFT) | (char)digits[0])));
-                        }
-                    }
-                    break;
-                case 2:
-                    if ((8 * sizeof(char) > 1 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 2 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(char, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(char) - 1 > 2 * PyLong_SHIFT)) {
-                            return (char) ((((((char)digits[1]) << PyLong_SHIFT) | (char)digits[0])));
-                        }
-                    }
-                    break;
-                case -3:
-                    if ((8 * sizeof(char) - 1 > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(char, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(char) - 1 > 3 * PyLong_SHIFT)) {
-                            return (char) (((char)-1)*(((((((char)digits[2]) << PyLong_SHIFT) | (char)digits[1]) << PyLong_SHIFT) | (char)digits[0])));
-                        }
-                    }
-                    break;
-                case 3:
-                    if ((8 * sizeof(char) > 2 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 3 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(char, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(char) - 1 > 3 * PyLong_SHIFT)) {
-                            return (char) ((((((((char)digits[2]) << PyLong_SHIFT) | (char)digits[1]) << PyLong_SHIFT) | (char)digits[0])));
-                        }
-                    }
-                    break;
-                case -4:
-                    if ((8 * sizeof(char) - 1 > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(char, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(char) - 1 > 4 * PyLong_SHIFT)) {
-                            return (char) (((char)-1)*(((((((((char)digits[3]) << PyLong_SHIFT) | (char)digits[2]) << PyLong_SHIFT) | (char)digits[1]) << PyLong_SHIFT) | (char)digits[0])));
-                        }
-                    }
-                    break;
-                case 4:
-                    if ((8 * sizeof(char) > 3 * PyLong_SHIFT)) {
-                        if ((8 * sizeof(unsigned long) > 4 * PyLong_SHIFT)) {
-                            __PYX_VERIFY_RETURN_INT(char, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if ((8 * sizeof(char) - 1 > 4 * PyLong_SHIFT)) {
-                            return (char) ((((((((((char)digits[3]) << PyLong_SHIFT) | (char)digits[2]) << PyLong_SHIFT) | (char)digits[1]) << PyLong_SHIFT) | (char)digits[0])));
-                        }
-                    }
-                    break;
-            }
-        }
-#endif
-        if ((sizeof(char) <= sizeof(long))) {
-            __PYX_VERIFY_RETURN_INT_EXC(char, long, PyLong_AsLong(x))
-        } else if ((sizeof(char) <= sizeof(PY_LONG_LONG))) {
-            __PYX_VERIFY_RETURN_INT_EXC(char, PY_LONG_LONG, PyLong_AsLongLong(x))
-        }
-    }
-    {
-        char val;
-        int ret = -1;
-#if PY_VERSION_HEX >= 0x030d00A6 && !CYTHON_COMPILING_IN_LIMITED_API
-        Py_ssize_t bytes_copied = PyLong_AsNativeBytes(
-            x, &val, sizeof(val), Py_ASNATIVEBYTES_NATIVE_ENDIAN | (is_unsigned ? Py_ASNATIVEBYTES_UNSIGNED_BUFFER | Py_ASNATIVEBYTES_REJECT_NEGATIVE : 0));
-        if (unlikely(bytes_copied == -1)) {
-        } else if (unlikely(bytes_copied > (Py_ssize_t) sizeof(val))) {
-            goto raise_overflow;
-        } else {
-            ret = 0;
-        }
-#elif PY_VERSION_HEX < 0x030d0000 && !(CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API) || defined(_PyLong_AsByteArray)
-        int one = 1; int is_little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&val;
-        ret = _PyLong_AsByteArray((PyLongObject *)x,
-                                    bytes, sizeof(val),
-                                    is_little, !is_unsigned);
-#else
-        PyObject *v;
-        PyObject *stepval = NULL, *mask = NULL, *shift = NULL;
-        int bits, remaining_bits, is_negative = 0;
-        int chunk_size = (sizeof(long) < 8) ? 30 : 62;
-        if (likely(PyLong_CheckExact(x))) {
-            v = __Pyx_NewRef(x);
-        } else {
-            v = PyNumber_Long(x);
-            if (unlikely(!v)) return (char) -1;
-            assert(PyLong_CheckExact(v));
-        }
-        {
-            int result = PyObject_RichCompareBool(v, Py_False, Py_LT);
-            if (unlikely(result < 0)) {
-                Py_DECREF(v);
-                return (char) -1;
-            }
-            is_negative = result == 1;
-        }
-        if (is_unsigned && unlikely(is_negative)) {
-            Py_DECREF(v);
-            goto raise_neg_overflow;
-        } else if (is_negative) {
-            stepval = PyNumber_Invert(v);
-            Py_DECREF(v);
-            if (unlikely(!stepval))
-                return (char) -1;
-        } else {
-            stepval = v;
-        }
-        v = NULL;
-        val = (char) 0;
-        mask = PyLong_FromLong((1L << chunk_size) - 1); if (unlikely(!mask)) goto done;
-        shift = PyLong_FromLong(chunk_size); if (unlikely(!shift)) goto done;
-        for (bits = 0; bits < (int) sizeof(char) * 8 - chunk_size; bits += chunk_size) {
-            PyObject *tmp, *digit;
-            long idigit;
-            digit = PyNumber_And(stepval, mask);
-            if (unlikely(!digit)) goto done;
-            idigit = PyLong_AsLong(digit);
-            Py_DECREF(digit);
-            if (unlikely(idigit < 0)) goto done;
-            val |= ((char) idigit) << bits;
-            tmp = PyNumber_Rshift(stepval, shift);
-            if (unlikely(!tmp)) goto done;
-            Py_DECREF(stepval); stepval = tmp;
-        }
-        Py_DECREF(shift); shift = NULL;
-        Py_DECREF(mask); mask = NULL;
-        {
-            long idigit = PyLong_AsLong(stepval);
-            if (unlikely(idigit < 0)) goto done;
-            remaining_bits = ((int) sizeof(char) * 8) - bits - (is_unsigned ? 0 : 1);
-            if (unlikely(idigit >= (1L << remaining_bits)))
-                goto raise_overflow;
-            val |= ((char) idigit) << bits;
-        }
-        if (!is_unsigned) {
-            if (unlikely(val & (((char) 1) << (sizeof(char) * 8 - 1))))
-                goto raise_overflow;
-            if (is_negative)
-                val = ~val;
-        }
-        ret = 0;
-    done:
-        Py_XDECREF(shift);
-        Py_XDECREF(mask);
-        Py_XDECREF(stepval);
-#endif
-        if (unlikely(ret))
-            return (char) -1;
-        return val;
-    }
-raise_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "value too large to convert to char");
-    return (char) -1;
-raise_neg_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "can't convert negative value to char");
-    return (char) -1;
-}
-
 /* PyObjectVectorCallKwBuilder (used by CIntToPy) */
 #if CYTHON_VECTORCALL
 static int __Pyx_VectorcallBuilder_AddArg(PyObject *key, PyObject *value, PyObject *builder, PyObject **args, int n) {
@@ -10088,6 +8992,114 @@ CYTHON_UNUSED static int __Pyx_VectorcallBuilder_AddArg_Check(PyObject *key, PyO
         return -1;
     }
     return PyDict_SetItem(builder, key, value);
+}
+#endif
+
+/* CIntToPy */
+static CYTHON_INLINE PyObject* __Pyx_PyLong_From_unsigned_int(unsigned int value) {
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+    const unsigned int neg_one = (unsigned int) -1, const_zero = (unsigned int) 0;
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic pop
+#endif
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(unsigned int) < sizeof(long)) {
+            return PyLong_FromLong((long) value);
+        } else if (sizeof(unsigned int) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#if !CYTHON_COMPILING_IN_PYPY
+        } else if (sizeof(unsigned int) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(unsigned int) <= sizeof(long)) {
+            return PyLong_FromLong((long) value);
+        } else if (sizeof(unsigned int) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+        }
+    }
+    {
+        unsigned char *bytes = (unsigned char *)&value;
+#if !CYTHON_COMPILING_IN_LIMITED_API && PY_VERSION_HEX >= 0x030d00A4
+        if (is_unsigned) {
+            return PyLong_FromUnsignedNativeBytes(bytes, sizeof(value), -1);
+        } else {
+            return PyLong_FromNativeBytes(bytes, sizeof(value), -1);
+        }
+#elif !CYTHON_COMPILING_IN_LIMITED_API && PY_VERSION_HEX < 0x030d0000
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        return _PyLong_FromByteArray(bytes, sizeof(unsigned int),
+                                     little, !is_unsigned);
+#else
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        PyObject *from_bytes, *result = NULL, *kwds = NULL;
+        PyObject *py_bytes = NULL, *order_str = NULL;
+        from_bytes = PyObject_GetAttrString((PyObject*)&PyLong_Type, "from_bytes");
+        if (!from_bytes) return NULL;
+        py_bytes = PyBytes_FromStringAndSize((char*)bytes, sizeof(unsigned int));
+        if (!py_bytes) goto limited_bad;
+        order_str = PyUnicode_FromString(little ? "little" : "big");
+        if (!order_str) goto limited_bad;
+        {
+            PyObject *args[3+(CYTHON_VECTORCALL ? 1 : 0)] = { NULL, py_bytes, order_str };
+            if (!is_unsigned) {
+                kwds = __Pyx_MakeVectorcallBuilderKwds(1);
+                if (!kwds) goto limited_bad;
+                if (__Pyx_VectorcallBuilder_AddArgStr("signed", __Pyx_NewRef(Py_True), kwds, args+3, 0) < 0) goto limited_bad;
+            }
+            result = __Pyx_Object_Vectorcall_CallFromBuilder(from_bytes, args+1, 2 | __Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET, kwds);
+        }
+        limited_bad:
+        Py_XDECREF(kwds);
+        Py_XDECREF(order_str);
+        Py_XDECREF(py_bytes);
+        Py_XDECREF(from_bytes);
+        return result;
+#endif
+    }
+}
+
+/* FormatTypeName */
+#if CYTHON_COMPILING_IN_LIMITED_API && __PYX_LIMITED_VERSION_HEX < 0x030d0000
+static __Pyx_TypeName
+__Pyx_PyType_GetFullyQualifiedName(PyTypeObject* tp)
+{
+    PyObject *module = NULL, *name = NULL, *result = NULL;
+    #if __PYX_LIMITED_VERSION_HEX < 0x030b0000
+    name = __Pyx_PyObject_GetAttrStr((PyObject *)tp,
+                                               __pyx_mstate_global->__pyx_n_u_qualname);
+    #else
+    name = PyType_GetQualName(tp);
+    #endif
+    if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) goto bad;
+    module = __Pyx_PyObject_GetAttrStr((PyObject *)tp,
+                                               __pyx_mstate_global->__pyx_n_u_module);
+    if (unlikely(module == NULL) || unlikely(!PyUnicode_Check(module))) goto bad;
+    if (PyUnicode_CompareWithASCIIString(module, "builtins") == 0) {
+        result = name;
+        name = NULL;
+        goto done;
+    }
+    result = PyUnicode_FromFormat("%U.%U", module, name);
+    if (unlikely(result == NULL)) goto bad;
+  done:
+    Py_XDECREF(name);
+    Py_XDECREF(module);
+    return result;
+  bad:
+    PyErr_Clear();
+    if (name) {
+        result = name;
+        name = NULL;
+    } else {
+        result = __Pyx_NewRef(__pyx_mstate_global->__pyx_kp_u__3);
+    }
+    goto done;
 }
 #endif
 
@@ -10159,45 +9171,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyLong_From_long(long value) {
 #endif
     }
 }
-
-/* FormatTypeName */
-#if CYTHON_COMPILING_IN_LIMITED_API && __PYX_LIMITED_VERSION_HEX < 0x030d0000
-static __Pyx_TypeName
-__Pyx_PyType_GetFullyQualifiedName(PyTypeObject* tp)
-{
-    PyObject *module = NULL, *name = NULL, *result = NULL;
-    #if __PYX_LIMITED_VERSION_HEX < 0x030b0000
-    name = __Pyx_PyObject_GetAttrStr((PyObject *)tp,
-                                               __pyx_mstate_global->__pyx_n_u_qualname);
-    #else
-    name = PyType_GetQualName(tp);
-    #endif
-    if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) goto bad;
-    module = __Pyx_PyObject_GetAttrStr((PyObject *)tp,
-                                               __pyx_mstate_global->__pyx_n_u_module);
-    if (unlikely(module == NULL) || unlikely(!PyUnicode_Check(module))) goto bad;
-    if (PyUnicode_CompareWithASCIIString(module, "builtins") == 0) {
-        result = name;
-        name = NULL;
-        goto done;
-    }
-    result = PyUnicode_FromFormat("%U.%U", module, name);
-    if (unlikely(result == NULL)) goto bad;
-  done:
-    Py_XDECREF(name);
-    Py_XDECREF(module);
-    return result;
-  bad:
-    PyErr_Clear();
-    if (name) {
-        result = name;
-        name = NULL;
-    } else {
-        result = __Pyx_NewRef(__pyx_mstate_global->__pyx_kp_u__3);
-    }
-    goto done;
-}
-#endif
 
 /* CIntFromPy */
 static CYTHON_INLINE long __Pyx_PyLong_As_long(PyObject *x) {

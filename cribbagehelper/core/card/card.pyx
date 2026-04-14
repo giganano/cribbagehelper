@@ -1,13 +1,13 @@
 # This file is part of the cribbagehelper package.
 # Copyright (C) 2026 James W. Johnson (giganano9@gmail.com)
 # License: MIT License. See LICENSE under top-level directory
-# at https://github.com/giganano/cribbagehelper.git
+# at: https://github.com/giganano/cribbagehelper.git
 
-__all__ = ["card"]
+__all__ = ["Card"]
 from . cimport card
 from libc.stdlib cimport malloc, free
 
-cdef class card:
+cdef class Card:
 
 	r"""
 	.. class:: cribbagehelper.core.card(rank, suit)
@@ -47,23 +47,38 @@ cdef class card:
 		else: pass
 
 	def __repr__(self):
-		rep = "<cribbagehelper.card: "
-		if self.c[0].rank == 1:
-			rep += "Ace"
-		elif self.c[0].rank > 10:
-			rep += '%s' % ({
-				11: "Jack",
-				12: "Queen",
-				13: "King"
-				}[self.c[0].rank])
-		else:
-			rep += str(self.c[0].rank)
-		rep += " of %s>" % ({
-			'c': "Clubs",
-			'd': "Diamonds",
-			'h': "Hearts",
-			's': "Spades"
-			}[chr(self.c[0].suit)])
-		return rep
+		return "<cribbagehelper.card: %s of %s>" % (self.rank, self.suit)
+
+	@property
+	def rank(self):
+		r"""
+		Type : ``str``
+
+		The rank of the card (i.e., "Ace", "2", "3", ..., "10", "Jack", "Queen",
+		or "King").
+		"""
+		mapping = {
+			1: "Ace",
+			11: "Jack",
+			12: "Queen",
+			13: "King"
+		}
+		for i in range(2, 11): mapping[i] = str(i)
+		return mapping[self.c[0].rank]
+
+	@property
+	def suit(self):
+		r"""
+		Type : ``str``
+
+		The suit of the card (i.e., "Clubs", "Diamonds", "Hearts", or
+		"Spades")
+		"""
+		return {
+			"c": "Clubs",
+			"d": "Diamonds",
+			"h": "Hearts",
+			"s": "Spades"
+		}[chr(self.c[0].suit)]
 
 

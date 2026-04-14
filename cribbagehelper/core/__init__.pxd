@@ -3,5 +3,6 @@
 # License: MIT License. See LICENSE under top-level directory
 # at https://github.com/giganano/cribbagehelper.git
 
-from .card cimport *
-__all__ = card.__all__
+from .card cimport Card, CARD
+from .hand cimport Hand, HAND, setupHand, copyHand, freeHand
+

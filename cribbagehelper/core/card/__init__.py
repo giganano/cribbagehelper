@@ -5,5 +5,5 @@
 # License: MIT License. See LICENSE under top-level repository
 # at: https://github.com/giganano/cribbagehelper.git
 
-__all__ = ["card"]
-from .card import card
+__all__ = ["Card"]
+from .card import Card

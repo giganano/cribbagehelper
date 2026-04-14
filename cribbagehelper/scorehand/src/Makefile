@@ -3,6 +3,5 @@
 # License: MIT License. See LICENSE under top-level directory
 # at https://github.com/giganano/cribbagehelper.git
 
-from .src cimport CARD
-cdef class Card:
-	cdef CARD *c
+include ../../../common.mk
+THIS_DIR := "./cribbagehelper/scorehand/src"

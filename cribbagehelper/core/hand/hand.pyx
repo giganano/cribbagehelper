@@ -3,11 +3,13 @@
 # License: MIT License. See LICENSE under top-level directory
 # at: https://github.com/giganano/cribbagehelper.git
 
+__all__ = ["Hand"]
 from . cimport hand
-from ..card cimport card, CARD
+from ..card cimport Card, CARD
 from libc.stdlib cimport malloc, free
+from libc.stdio cimport printf
 
-cdef class hand:
+cdef class Hand:
 
 	r"""
 	.. class:: cribbagehelper.core.hand(ranks, suits)
@@ -34,24 +36,16 @@ cdef class hand:
 
 	def __cinit__(self, ranks, suits):
 		# TODO: error handling
-		n = len(ranks)
-		cdef unsigned short *_ranks = <unsigned short *> malloc (n * sizeof(
-			unsigned short))
-		cdef char *_suits = <char *> malloc (n * sizeof(char))
-		for i in range(n):
-			_ranks[i] = ranks[i]
-			_suits[i] = suits[i]
-		try:
-			self.h = setup_hand(<unsigned short> n, _ranks, _suits)
-		finally:
-			free(_ranks)
-			free(_suits)
+		self.h = setupHand(<unsigned short> len(ranks))
 
 	def __init__(self, ranks, suits):
-		pass
+		# TODO: error handling
+		for i in range(len(ranks)):
+			self.h[0].cards[i][0].rank = <unsigned short> ranks[i]
+			self.h[0].cards[i][0].suit = <char> ord(suits[i])
 
 	def __dealloc__(self):
-		free_hand(self.h)
+		freeHand(self.h)
 
 	def __enter__(self):
 		return self
@@ -60,30 +54,20 @@ cdef class hand:
 		return exc_type is None
 
 	def __len__(self):
-		return self.h[0].ncards
+		return self.h[0].nCards
 
 	def __repr__(self):
 		rep = "<cribbagehelder.hand: "
 		for i in range(self.__len__()):
 			if i: rep += ", "
 			c = self.__getitem__(i)
-			rep += "%s of %s" % (
-				c.__repr__().split()[-2],
-				c.__repr__().split()[-1][:-1])
+			rep += "%s of %s" % (c.rank, c.suit)
 		rep += ">"
 		return rep
 
 	def __getitem__(self, index):
-		cdef void *ptr = <void *> self.h[0].cards[index]
-		c = card(1, 's')
-		free(c.c)
-		c.c = <CARD *> ptr
-		# self.h[0].cards[index]
-		return c
-
-
-
-
-
-
+		# TODO: error handling
+		return Card(
+			self.h[0].cards[index][0].rank,
+			chr(self.h[0].cards[index][0].suit))
 

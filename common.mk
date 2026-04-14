@@ -7,6 +7,7 @@ CC := gcc
 CFLAGS := -fPIC -Wsign-conversion -Wsign-compare
 CYTHON_SOURCES := $(wildcard *.pyx)
 CYTHON_OUTPUTS := $(CYTHON_SOURCES:.pyx=.c)
+SHARED_OBJECTS := $(wildcard *.so)
 C_SOURCES := $(filter-out $(CYTHON_OUTPUTS), $(wildcard *.c))
 C_OUTPUTS := $(C_SOURCES:.c=.o)
 C_HEADERS := $(C_SOURCES:.c=.h)
@@ -38,11 +39,13 @@ clibclean:
 .PHONY: clean
 clean:
 	@ echo Cleaning $(THIS_DIR)
-
 	@ if [ -d "__pycache__" ] ; then \
 		rm -rf __pycache__ ; \
 	fi
 	@ for i in $(CYTHON_OUTPUTS) ; do \
+		rm -f $$i ; \
+	done
+	@ for i in $(SHARED_OBJECTS) ; do \
 		rm -f $$i ; \
 	done
 	@ for i in $(C_OUPUTS) ; do \

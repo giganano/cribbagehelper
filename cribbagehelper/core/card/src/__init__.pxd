@@ -7,4 +7,3 @@ cdef extern from "card.h":
 	ctypedef struct CARD:
 		unsigned int rank
 		char suit
-	inline unsigned short card_count_value(CARD c)
