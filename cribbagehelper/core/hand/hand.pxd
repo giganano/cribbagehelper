@@ -4,6 +4,8 @@
 # at: https://github.com/giganano/cribbagehelper.git
 
 from .src cimport HAND, setupHand, freeHand
+from ...scorehand cimport scoreHand
+
 cdef class Hand:
 	cdef HAND *h
 

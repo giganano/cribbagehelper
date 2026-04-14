@@ -3,4 +3,4 @@
 # License: MIT License. See LICENSE under top-level directory
 # at: https://github.com/giganano/cribbagehelper.git
 
-from .src cimport fifteens, flush, heels, knobs, pairs, runs, score
+from .src cimport fifteens, flush, heels, knobs, pairs, runs, scoreHand

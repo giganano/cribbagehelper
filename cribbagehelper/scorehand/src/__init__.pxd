@@ -30,5 +30,5 @@ cdef extern from "./runs.h":
 
 
 cdef extern from "./score.h":
-	unsigned short score(HAND h)
+	unsigned short scoreHand(HAND h)
 

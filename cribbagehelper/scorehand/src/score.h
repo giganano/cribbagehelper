@@ -23,7 +23,7 @@ extern "C" {
 /*
 TODO: documentation
 */
-inline unsigned short score(HAND h) {
+inline unsigned short scoreHand(HAND h) {
 
 	return fifteens(h) + flush(h) + heels(h) + knobs(h) + pairs(h) + runs(h);
 

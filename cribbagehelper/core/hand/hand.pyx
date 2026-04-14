@@ -71,3 +71,7 @@ cdef class Hand:
 			self.h[0].cards[index][0].rank,
 			chr(self.h[0].cards[index][0].suit))
 
+
+	def score(self):
+		return scoreHand(self.h[0])
+

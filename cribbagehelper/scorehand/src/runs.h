@@ -15,7 +15,22 @@ extern "C" {
 #include "../../core/hand/src/hand.h"
 
 /*
-TODO: documentation for this function.
+.. c:function:: extern unsigned short runs(HAND h);
+
+	Compute the number of points in the hand from runs, referring to three
+	cards or more of consecutive rank (e.g., ace-two-three, nine-ten-Jack).
+
+	Parameters
+	----------
+	h : ``HAND``
+		The hand being scored.
+
+	Returns
+	-------
+	points : ``unsigned short``
+		The number of points in the hand from runs alone.
+		This function naturally catches double runs, with the additional
+		points from pairs being handled in ``pairs.h``.
 */
 extern unsigned short runs(HAND h);
 
