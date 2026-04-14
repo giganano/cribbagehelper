@@ -1,6 +1,7 @@
 *.sublime-project
 *.sublime-workspace
 **/*.so
+**/*.o
 **/__pycache__/**
 cribbagehelper.egg-info/**
 cribbagehelper/core/card/card.c
