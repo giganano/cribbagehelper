@@ -6,11 +6,12 @@
 __all__ = ["Card"]
 from . cimport card
 from libc.stdlib cimport malloc, free
+import numbers
 
 cdef class Card:
 
 	r"""
-	.. class:: cribbagehelper.core.card(rank, suit)
+	.. class:: cribbagehelper.Card(rank, suit)
 
 		The base class for a single card from a 52-card playing card deck.
 
@@ -32,39 +33,67 @@ cdef class Card:
 			* Functions and example code.
 	"""
 
+	_RANK_TO_NAME_ = {
+		**{1: "ace", 11: "jack", 12: "queen", 13: "king"},
+		**dict(zip(range(2, 11), [str(_) for _ in range(2, 11)]))
+	}
+
+	_SUIT_NAMES_ = {
+		"c": "clubs",
+		"d": "diamonds",
+		"h": "hearts",
+		"s": "spades"
+	}
+
 	def __cinit__(self, rank, suit):
-		# TODO: error handling
 		self.c = <CARD *> malloc (sizeof(CARD))
 
 	def __init__(self, rank, suit):
-		self.c[0].rank = <unsigned short> rank
-		self.c[0].suit = <char> ord(suit)
+		self.rank = rank
+		self.suit = suit
+		self._copy = 0
 
 	def __dealloc__(self):
+		if self._copy: return
 		if self.c is not NULL:
 			free(self.c)
 			self.c = NULL
 		else: pass
 
 	def __repr__(self):
-		return "<cribbagehelper.card: %s of %s>" % (self.rank, self.suit)
+		return "<cribbagehelper.card: %s of %s>" % (
+			self._RANK_TO_NAME_[self.rank].capitalize(),
+			self._SUIT_NAMES_[self.suit].capitalize()
+			)
 
 	@property
 	def rank(self):
 		r"""
-		Type : ``str``
+		Type : ``int``
 
-		The rank of the card (i.e., "Ace", "2", "3", ..., "10", "Jack", "Queen",
-		or "King").
+		The rank of the playing card. 1 for Ace, 11 for Jack, 12 for Queen, 13 for
+		King, and otherwise the numerical value of the card.
 		"""
-		mapping = {
-			1: "Ace",
-			11: "Jack",
-			12: "Queen",
-			13: "King"
-		}
-		for i in range(2, 11): mapping[i] = str(i)
-		return mapping[self.c[0].rank]
+		return self.c[0].rank
+
+	@rank.setter
+	def rank(self, value):
+		if isinstance(value, numbers.Number):
+			if value % 1 == 0:
+				value = int(value)
+				if 1 <= value <= 13:
+					self.c[0].rank = <unsigned short> value
+				else:
+					raise ValueError("""\
+Card rank outside allowed range. Must be between 1 and 13 (inclusive). \
+Got: %d""" % (value))
+			else:
+				raise ValueError("""\
+Card rank must be an integer between 1 and 13 (inclusive). Received a \
+floating point number: %.5e""" % (value))
+		else:
+			raise TypeError("Card rank must be an integer. Got: %s" % (
+				type(value)))
 
 	@property
 	def suit(self):
@@ -74,11 +103,19 @@ cdef class Card:
 		The suit of the card (i.e., "Clubs", "Diamonds", "Hearts", or
 		"Spades")
 		"""
-		return {
-			"c": "Clubs",
-			"d": "Diamonds",
-			"h": "Hearts",
-			"s": "Spades"
-		}[chr(self.c[0].suit)]
+		return chr(self.c[0].suit)
+
+	@suit.setter
+	def suit(self, value):
+		if isinstance(value, str):
+			if value in self._SUIT_NAMES_.keys():
+				self.c[0].suit = <char> ord(value)
+			else:
+				raise ValueError("""\
+Card suit must be a one-character string: 'c', 'd', 'h', or 's'. \
+Got: \"%s\"""" % (value))
+		else:
+			raise TypeError("""\
+Card suit must be a one-character string. Got: %s""" % (type(value)))
 
 

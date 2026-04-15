@@ -8,11 +8,12 @@ from . cimport hand
 from ..card cimport Card, CARD
 from libc.stdlib cimport malloc, free
 from libc.stdio cimport printf
+import numbers
 
 cdef class Hand:
 
 	r"""
-	.. class:: cribbagehelper.core.hand(ranks, suits)
+	.. class:: cribbagehelper.Hand(ranks, suits)
 
 		The base class for a hand of cards.
 
@@ -35,14 +36,27 @@ cdef class Hand:
 	"""
 
 	def __cinit__(self, ranks, suits):
-		# TODO: error handling
-		self.h = setupHand(<unsigned short> len(ranks))
+		if (hasattr(ranks, "__getitem__") and hasattr(ranks, "__len__") and
+			hasattr(suits, "__getitem__") and hasattr(suits, "__len__")):
+			if len(ranks) == len(suits):
+				self.h = setupHand(<unsigned short> len(ranks))
+			else:
+				raise ValueError("""\
+Array-length mismatch. Got %d card ranks but %d suits.""" % (
+					len(ranks), len(suits)))
+		else:
+			raise TypeError("""\
+Card ranks and suits must both be array-like objects. \
+Received for ranks: %s. \
+Received for suits: %s.""" % (type(ranks), type(suits)))
+
 
 	def __init__(self, ranks, suits):
-		# TODO: error handling
 		for i in range(len(ranks)):
-			self.h[0].cards[i][0].rank = <unsigned short> ranks[i]
-			self.h[0].cards[i][0].suit = <char> ord(suits[i])
+			# let the card object do the error handling
+			cpy = self.__getitem__(i)
+			cpy.rank = ranks[i]
+			cpy.suit = suits[i]
 
 	def __dealloc__(self):
 		freeHand(self.h)
@@ -61,16 +75,32 @@ cdef class Hand:
 		for i in range(self.__len__()):
 			if i: rep += ", "
 			c = self.__getitem__(i)
-			rep += "%s of %s" % (c.rank, c.suit)
+			rep += "%s of %s" % (
+				c._RANK_TO_NAME_[c.rank].capitalize(),
+				c._SUIT_NAMES_[c.suit].capitalize())
 		rep += ">"
 		return rep
 
 	def __getitem__(self, index):
-		# TODO: error handling
-		return Card(
-			self.h[0].cards[index][0].rank,
-			chr(self.h[0].cards[index][0].suit))
-
+		if isinstance(index, numbers.Number):
+			if index % 1 == 0:
+				index = int(index)
+				if index < -self.__len__() or index >= self.__len__():
+					raise IndexError("""\
+Index %d out of bounds for hand of %d cards.""" % (index, self.__len__()))
+				elif -self.__len__() <= index < 0:
+					index += self.__len__()
+				cpy = Card(1, 's')
+				free(cpy.c)
+				cpy.c = self.h[0].cards[index]
+				cpy._copy = 1
+				return cpy
+			else:
+				raise IndexError("""\
+Index must be an integer. Received a floating point number: %.5e""" % (index))
+		else:
+			raise IndexError("Index must be an integer. Got: %s" % (
+				type(index)))
 
 	def score(self):
 		return scoreHand(self.h[0])

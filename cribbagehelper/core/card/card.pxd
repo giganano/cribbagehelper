@@ -6,3 +6,4 @@
 from .src cimport CARD
 cdef class Card:
 	cdef CARD *c
+	cdef unsigned short _copy # if this object is a duplicate made for python purposes
