@@ -15,7 +15,21 @@ extern "C" {
 #include "../../core/hand/src/hand.h"
 
 /*
-TODO: documentation for this function.
+.. c:function:: inline unsigned short heels(HAND h);
+
+	Determine the number of points in the hand due to heels, which arises
+	when a Jack is turned up when the deck is cut and awards two points.
+
+	Parameters
+	----------
+	h : ``HAND``
+		The hand of cards itself.
+
+	Returns
+	-------
+	points : ``unsigned short``
+		2 if the final card in the hand (interpreted as the turn card), has a
+		rank value of 11. 0 otherwise.
 */
 inline unsigned short heels(HAND h) {
 

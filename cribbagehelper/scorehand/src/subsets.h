@@ -15,7 +15,26 @@ extern "C" {
 #include "../../core/hand/src/hand.h"
 
 /*
-TODO: documentation for this function.
+.. c:function::	extern HAND **subsets(HAND input, unsigned short nCards);
+
+	Obtain all possible combinations of some number of cards from a
+	player's hand.
+
+	Parameters
+	----------
+	input : ``HAND``
+		The hand of cards itself.
+
+	Returns
+	-------
+	combinations : ``HAND **``
+		A pointer to all possible distinct combinations of nCards drawn from
+		the input hand of cards.
+		Index along the first axis to access different cards, and simply
+		dereference along the second axis.
+		There will be ``choose(input.nCards, nCards)`` unique hands of cards
+		stored in this pointer.
+		A NULL pointer is returned if ``nCards > input.nCards``.
 */
 extern HAND **subsets(HAND input, unsigned short nCards);
 
@@ -27,6 +46,9 @@ extern HAND **subsets(HAND input, unsigned short nCards);
 	.. math::
 
 		f(a, b) \equiv \frac{a!}{b!(a - b)!}
+
+	From a set containing ``a`` elements, ``a`` choose ``b`` evaluates to the
+	number of unique subsets (i.e., possible combinations) of ``b`` elements.
 
 	Parameters
 	----------

@@ -3,6 +3,9 @@ This file is part of the Cribbagehelper package.
 Copyright (C) 2026 James W. Johnson (giganano9@gmail.com)
 License: MIT License. See LICENSE under top-level directory
 at: https://github.com/giganano/cribbagehelper.git
+
+See documentation of extern functions in pairs.h
+(not duplicated here for brevity)
 */
 
 #include <stdlib.h>

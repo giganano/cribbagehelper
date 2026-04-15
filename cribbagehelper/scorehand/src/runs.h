@@ -29,8 +29,14 @@ extern "C" {
 	-------
 	points : ``unsigned short``
 		The number of points in the hand from runs alone.
-		This function naturally catches double runs, with the additional
-		points from pairs being handled in ``pairs.h``.
+
+	Notes
+	-----
+	This routine, in combination with cribbagehelper's pair detection
+	algorithm, naturally account for so-called "double runs" and "triple runs"
+	with duplicate instances of a given rank (e.g., seven-seven-eight-eight-nine).
+
+	.. seealso:: cribbagehelper/scorehand/src/pairs.h
 */
 extern unsigned short runs(HAND h);
 

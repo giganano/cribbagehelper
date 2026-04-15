@@ -15,7 +15,7 @@ See documentation of extern functions in subsets.h
 static void subsetIndexGenerator(
 	unsigned short **indices,
 	unsigned short subsetSize,
-	unsigned short maximum,
+	unsigned short parentsetSize,
 	unsigned long n);
 
 
@@ -29,21 +29,9 @@ extern HAND **subsets(HAND input, unsigned short nCards) {
 	for (unsigned long i = 0ul; i < nCombinations; i++) {
 		indices[i] = (unsigned short *) malloc (nCards * sizeof(unsigned short));
 	}
-	for (unsigned short i = 0u; i < nCards; i++) {
-		indices[0][i] = i;
-	}
-	subsetIndexGenerator(indices, nCards, input.nCards - 1u, 1ul);
+	for (unsigned short i = 0u; i < nCards; i++) indices[0][i] = i;
+	subsetIndexGenerator(indices, nCards, input.nCards, 1ul);
 	for (unsigned long i = 0ul; i < nCombinations; i++) {
-		// unsigned short *ranks = (unsigned short *) malloc (
-		// 	nCards * sizeof(unsigned short));
-		// char *suits = (char *) malloc (nCards * sizeof(char));
-		// for (unsigned short j = 0ul; j < nCards; j++) {
-		// 	ranks[j] = (*input.cards[indices[i][j]]).rank;
-		// 	suits[j] = (*input.cards[indices[i][j]]).suit;
-		// }
-		// combinations[i] = setupHand(nCards, ranks, suits);
-		// free(ranks);
-		// free(suits);
 		combinations[i] = setupHand(nCards);
 		for (unsigned short j = 0u; j < nCards; j++) {
 			combinations[i] -> cards[j] -> rank = (*input.cards[indices[i][j]]).rank;
@@ -57,26 +45,77 @@ extern HAND **subsets(HAND input, unsigned short nCards) {
 
 
 /*
-TODO: docs for this function. recursive approach.
+.. c:function:: static void subsetIndexGenerator(unsigned short **indices,
+	unsigned short subsetSize,
+	unsigned short parentsetSize,
+	unsigned short n);
+
+	Generate all possible integers between zero and some maximum value
+	(inclusive).
+	These values are used as array indices to generate all possible
+	subsets of a given size from larger parent sets of playing cards for
+	scoring hands.
+
+	Parameters
+	----------
+	indices : ``unsigned short **``
+		A pointer to the array of indices, with memory allocated and only the
+		first row of elements initialized.
+		There must be memory allocated for ``choose(parentsetSize, subsetSize)``
+		values along the first axis of indexing and ``subsetSize`` along the
+		second.
+		This first row must be equal to the lowest integers starting from zero
+		in ascending order (e.g., 0-1-2-3 for a ``parentsetSize`` value of 3).
+		The remaining rows will be populated through recursion.
+	subsetSize : ``unsigned short``
+		The number of elements in each subset.
+	parentsetSize : ``unsigned short``
+		The number of elements in the parent set (often all of the cards in a
+		player's hand).
+	n : ``unsigned short``
+		Should always be called with a value of 1.
+		Value will be incremented through recursion to track progress through
+		the algorithm.
+
+	Upon completion of this routine, all subsequent rows of ``indices`` will
+	be populated. For example, the following first row:
+
+	0 1 2
+
+	with a parentsetSize of 5, ``indices`` will become
+
+	0 1 2
+	0 1 3
+	0 1 4
+	0 2 3
+	0 2 4
+	0 3 4
+	1 2 3
+	1 2 4
+	1 3 4
+	2 3 4
 */
 static void subsetIndexGenerator(
 	unsigned short **indices,
 	unsigned short subsetSize,
-	unsigned short maximum,
+	unsigned short parentsetSize,
 	unsigned long n) {
 
 	/*
 	Check if the last entry to ``indices`` was the last possible combination
 	of ``subsetSize`` integers.
+	This state functions as a base case for this implementation, since the
+	recursive implementation should halt.
 	*/
 	unsigned short last = 1u;
 	for (unsigned short i = 0u; i < subsetSize; i++) {
-		last &= indices[n - 1ul][i] == maximum - subsetSize + i + 1ul;
+		last &= indices[n - 1ul][i] == parentsetSize - subsetSize + i;
 	}
 	if (last) return;
 
 	/*
-	Copy over the last iteration
+	Copy the previous "row" into the current "row" (i.e., ``indicies[n - 1]``
+	into ``indices[n]``).
 	*/
 	for (unsigned short i = 0u; i < subsetSize; i++) {
 		indices[n][i] = indices[n - 1ul][i];
@@ -84,18 +123,18 @@ static void subsetIndexGenerator(
 
 	/*
 	Find the latest element of indices[n] that can be incremented by 1 without
-	going above ``maximum`` or becoming equal to the subsequent element of
-	indices[n].
+	going above ``parentsetSize - 1ul`` or becoming equal to the subsequent
+	element of indices[n].
 	*/
 	unsigned short idx;
-	if (indices[n][subsetSize - 1u] < maximum) {
+	if (indices[n][subsetSize - 1u] < parentsetSize - 1ul) {
 		idx = subsetSize - 1u;
 	} else {
 		idx = subsetSize - 2u;
 		while (indices[n][idx] == indices[n][idx + 1] - 1u) idx--;
 	}
 
-	/* increment it by one */
+	/* increment that one by one */
 	indices[n][idx]++;
 
 	/*
@@ -106,33 +145,11 @@ static void subsetIndexGenerator(
 		indices[n][i] = indices[n][i - 1] + 1u;
 	}
 
-	return subsetIndexGenerator(indices, subsetSize, maximum, n + 1ul);
+	return subsetIndexGenerator(indices, subsetSize, parentsetSize, n + 1ul);
 
 }
 
 
-/*
-.. c:function:: static unsigned long choose(unsigned long a, unsigned long b);
-
-	Compute the mathematical operation of ``a`` "choose" ``b``, according to:
-
-	.. math::
-
-		f(a, b) \equiv \frac{a!}{b!(a - b)!}
-
-	Parameters
-	----------
-	a : ``unsigned long``
-		The first operand of the choose operation.
-	b : ``unsigned long``
-		The second operand of the choose operation.
-
-	Returns
-	-------
-	result : ``unsigned long``
-		The operation :math:`f(a, b)` defined above.
-		Returns 0 as a safeguard when a < b.
-*/
 extern unsigned long choose(unsigned long a, unsigned long b) {
 
 	unsigned long numerator = 1ul, denominator = 1ul;
@@ -141,9 +158,9 @@ extern unsigned long choose(unsigned long a, unsigned long b) {
 			numerator *= a--;
 			denominator *= b--;
 		}
-		return numerator / denominator; /* should always be divisible */
+		return numerator / denominator; /* always divisible bc number theory */
 	} else {
-		return 0u; /* should never happen */
+		return 0u; /* safeguard */
 	}
 
 }

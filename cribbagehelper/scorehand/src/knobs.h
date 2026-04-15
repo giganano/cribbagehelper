@@ -15,7 +15,21 @@ extern "C" {
 #include "../../core/hand/src/hand.h"
 
 /*
-TODO: documentation for this function.
+.. c:function:: extern unsigned short knobs(HAND h);
+
+	Determine the number of points in the nand from knobs, which awards
+	one point when a jack matches the suit of the turn card.
+
+	Parameters
+	----------
+	h : ``HAND``
+		The hand of cards itself.
+
+	Returns
+	-------
+	points : ``unsigned short``
+		1 if any of the cards (other than the turn card) is a jack whose
+		suit matches the turn card. 0 otherwise.
 */
 extern unsigned short knobs(HAND h);
 

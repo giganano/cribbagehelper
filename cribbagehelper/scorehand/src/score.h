@@ -21,7 +21,32 @@ extern "C" {
 #include "runs.h"
 
 /*
-TODO: documentation
+.. c:function:: inline unsigned short scoreHand(HAND h);
+
+	Compute the total number of points in a given cribbage hand.
+
+	Parameters
+	----------
+	h : ``HAND``
+		The hand of cards itself.
+
+	Returns
+	-------
+	points : ``unsigned short``
+		The total number of points, arising from fifteens, flushes,
+		heels, knobs, pairs, and runs.
+
+	.. seealso::
+
+		In the cribbagehelper/scorehand/src directory:
+
+			- fifteens.h
+			- flush.h
+			- heels.h
+			- knobs.h
+			- pairs.h
+			- runs.h
+			- subsets.h
 */
 inline unsigned short scoreHand(HAND h) {
 

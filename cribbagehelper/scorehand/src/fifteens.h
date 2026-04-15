@@ -17,7 +17,8 @@ extern "C" {
 /*
 .. c:function:: extern unsigned short fifteens(HAND h);
 
-	Count up all the point in the hand from fifteens.
+	Count up all the points in the hand from fifteens (i.e., combinations
+	of two cards whose point values add up to 15).
 
 	Parameters
 	----------
@@ -28,6 +29,11 @@ extern "C" {
 	-------
 	total : ``unsigned short``
 		Two times the number of combinations of cards that add up to fifteen.
+
+	Notes
+	-----
+	For these purposes, the jack, queen, and king each have a point value of 10
+	(e.g., a king and a five add up to 15 as opposed to 18).
 */
 extern unsigned short fifteens(HAND h);
 
