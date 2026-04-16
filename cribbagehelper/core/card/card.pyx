@@ -45,10 +45,56 @@ cdef class Card:
 		"s": "spades"
 	}
 
-	def __cinit__(self, rank, suit):
+	@staticmethod
+	def _rank_and_suit_from_string(identifier):
+		r"""
+		Determine the rank and suit of a card from its input string.
+		"""
+		if isinstance(identifier, str):
+			rank_msg = """\
+Invalid card rank. Must be 2-10 for a numerical card value or 'a', 'j', 'q', \
+or 'k' for an ace, jack, queen, or king, respectively. \
+Got: %s""" % (identifier[:-1])
+			if len(identifier) == 2:
+				if identifier[0].isdigit():
+					rank = int(identifier[0])
+				elif identifier[0].lower() in ['a', 'j', 'q', 'k']:
+					rank = {
+						'a': 1,
+						'j': 11,
+						'q': 12,
+						'k': 13
+					}[identifier[0].lower()]
+				else:
+					raise ValueError(rank_msg)
+			elif len(identifier) == 3:
+				if identifier.startswith("10"):
+					rank = 10
+				else:
+					raise ValueError(rank_msg)
+			else:
+				raise ValueError("""\
+Invalid card identifier. Must be 2-10 for a numerical card value or 'a', 'j', \
+'q', or 'k' for an ace, jack, queen, or king, respectively. Must be followed \
+by 'c', 'd', 'h', or 's' for clubs, diamonds, hearts, or spades, respectively. \
+Got: %s""" % (identifier))
+		else:
+			raise TypeError("Card identifier must be a string. Got: %s" % (
+				type(identifier)))
+		if identifier[-1].lower() in Card._SUIT_NAMES_.keys():
+			suit = identifier[-1].lower()
+		else:
+			raise ValueError("""\
+Invalid card suit. Must be 'c', 'd', 'h', or 's' for clubs, diamonds, hearts \
+or spades, respectively. Got: %s""" % (identifier[-1]))
+		return [rank, suit]
+
+	def __cinit__(self, identifier):
 		self.c = <CARD *> malloc (sizeof(CARD))
 
-	def __init__(self, rank, suit):
+	def __init__(self, identifier):
+		# let the subroutine do the error handling
+		rank, suit = self._rank_and_suit_from_string(identifier)
 		self.rank = rank
 		self.suit = suit
 		self._copy = 0
@@ -91,8 +137,25 @@ Got: %d""" % (value))
 				raise ValueError("""\
 Card rank must be an integer between 1 and 13 (inclusive). Received a \
 floating point number: %.5e""" % (value))
+		elif isinstance(value, str):
+			if (value in [str(_) for _ in range(2, 11)] or
+				value.lower() in ['a', 'j', 'q', 'k']):
+				if value.isdigit():
+					self.c[0].rank = <unsigned short> int(value)
+				else:
+					self.c[0].rank = {
+						'a': 1,
+						'j': 11,
+						'q': 12,
+						'k': 13
+					}[value.lower()]
+			else:
+				raise ValueError("""\
+Could not determine rank from string. Must be either any numerical value \
+between 2 and 10, 'a' for 'ace,' 'j' for 'jack,' 'q' for 'queen,' or 'k' for \
+'king.' Got: %s""" % (value))
 		else:
-			raise TypeError("Card rank must be an integer. Got: %s" % (
+			raise TypeError("Card rank must be an integer or string. Got: %s" % (
 				type(value)))
 
 	@property

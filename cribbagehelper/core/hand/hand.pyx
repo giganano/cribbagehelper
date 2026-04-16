@@ -35,28 +35,20 @@ cdef class Hand:
 			* Functions and example code.
 	"""
 
-	def __cinit__(self, ranks, suits):
-		if (hasattr(ranks, "__getitem__") and hasattr(ranks, "__len__") and
-			hasattr(suits, "__getitem__") and hasattr(suits, "__len__")):
-			if len(ranks) == len(suits):
-				self.h = setupHand(<unsigned short> len(ranks))
-			else:
-				raise ValueError("""\
-Array-length mismatch. Got %d card ranks but %d suits.""" % (
-					len(ranks), len(suits)))
-		else:
-			raise TypeError("""\
-Card ranks and suits must both be array-like objects. \
-Received for ranks: %s. \
-Received for suits: %s.""" % (type(ranks), type(suits)))
-
-
-	def __init__(self, ranks, suits):
+	def __cinit__(self, *args):
+		ranks = []
+		suits = []
+		for i, arg in enumerate(args):
+			# let the Card object do the error handling
+			r, s = Card._rank_and_suit_from_string(arg)
+			ranks.append(r)
+			suits.append(s)
+		self.h = setupHand(<unsigned long> len(ranks))
 		for i in range(len(ranks)):
-			# let the card object do the error handling
-			cpy = self.__getitem__(i)
-			cpy.rank = ranks[i]
-			cpy.suit = suits[i]
+			self.h[0].cards[i][0].rank = <unsigned short> ranks[i]
+			self.h[0].cards[i][0].suit = <char> ord(suits[i])
+
+	def __init__(self, *args): pass
 
 	def __dealloc__(self):
 		freeHand(self.h)
@@ -90,7 +82,7 @@ Received for suits: %s.""" % (type(ranks), type(suits)))
 Index %d out of bounds for hand of %d cards.""" % (index, self.__len__()))
 				elif -self.__len__() <= index < 0:
 					index += self.__len__()
-				cpy = Card(1, 's')
+				cpy = Card("1s")
 				free(cpy.c)
 				cpy.c = self.h[0].cards[index]
 				cpy._copy = 1
