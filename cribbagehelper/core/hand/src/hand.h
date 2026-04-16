@@ -16,7 +16,10 @@ extern "C" {
 /*
 .. c:type:: ``HAND``
 
-	A hand of playing cards from a standard 52-card deck.
+	A hand of playing cards from a standard 52-card deck, stored in an
+	array-like manner.
+	Scoring routines in ``cribbagehelper/scorehand/src`` assume that the card
+	in the last memory block refers to the turn card from the cut.
 
 	.. c:member:: ``CARD **cards``
 
@@ -24,46 +27,61 @@ extern "C" {
 
 		.. seealso:: cribbagehelper/core/card/src/card.h
 
-	.. c:member:: ``unsigned short ncards``
+	.. c:member:: ``unsigned short nCards``
 
 		The number of cards in the hand.
+
+	.. c:member:: ``unsigned short isCrib``
+
+		1 if this hand is being scored as a Crib. 0 if it is a regular hand.
 */
 typedef struct hand {
 
 	CARD **cards;
-	unsigned short ncards;
+	unsigned short nCards;
+	unsigned short isCrib;
 
 } HAND;
 
 /*
-.. c:function:: extern HAND *handinitialize(unsigned short ncards, unsigned short *ranks, char *suits);
+.. c:function:: extern HAND *setupHand(unsigned short ncards);
 
 	Allocate memory for and return a pointer to a hand of cards.
+	Does not assign ranks and suits to the constituent cards.
 
 	Parameters
 	----------
 	ncards : ``unsigned short *``
 		The number of cards in the hand.
-	ranks : ``unsigned short *``
-		The ranks of each card. 1 for Ace, 11 for Jack, 12 for Queen, and
-		13 for King. Otherwise, the face value of the card. 
-	suits : ``char *``
-		The suits of each card. 'c' for clubs, 'd' for diamonds, 'h' for
-		hearts, and 's' for spades. The order should be a component-wise
-		match with ``ranks``.
 
 	Returns
 	-------
 	h : ``HAND *``
-		A pointer to the ``HAND`` object containing the corresponding ``CARD``
-		objects.
+		A pointer to the ``HAND`` object containing the specified number of
+		``CARD`` objects.
 */
-extern HAND *setup_hand(unsigned short ncards,
-	unsigned short *ranks,
-	char *suits);
+extern HAND *setupHand(unsigned short nCards);
 
 /*
-.. c:function:: extern void free_hand(HAND *h);
+.. c:function:: extern HAND *copyHand(HAND h);
+
+	Allocate memory for and return a new pointer to a hand of cards with the
+	same cards as another hand.
+
+	Parameters
+	----------
+	h : ``HAND``
+		The hand of cards to copy.
+
+	Returns
+	-------
+	copy : ``HAND *``
+		The new hand with the same cards as the input ``h``.
+*/
+extern HAND *copyHand(HAND h);
+
+/*
+.. c:function:: extern void freeHand(HAND *h);
 
 	Free the memory stored by a ``HAND`` object.
 
@@ -72,7 +90,7 @@ extern HAND *setup_hand(unsigned short ncards,
 	h : ``HAND *``
 		A pointer to the hand object whose memory is to be freed.
 */
-extern void free_hand(HAND *h);
+extern void freeHand(HAND *h);
 
 #ifdef __cplusplus
 }

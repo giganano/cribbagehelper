@@ -3,7 +3,10 @@
 # License: MIT License. See LICENSE under top-level directory
 # at: https://github.com/giganano/cribbagehelper.git
 
-from .src cimport HAND, setup_hand, free_hand
-cdef class hand:
+from .src cimport HAND, setupHand, freeHand
+from ...scorehand cimport (scoreHand, fifteens, flush, knobs, pairs, runs,
+	heels as _heels) # alt name needed because of keyword arg "heels"
+
+cdef class Hand:
 	cdef HAND *h
 

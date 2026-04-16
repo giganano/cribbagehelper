@@ -3,17 +3,16 @@
 # License: MIT License. See LICENSE under top-level directory
 # at: https://github.com/giganano/cribbagehelper.git
 
-from ...card cimport CARD
+from ...card cimport Card, CARD
 
 cdef extern from "./hand.h":
 	ctypedef struct HAND:
 		CARD **cards
-		unsigned short ncards
+		unsigned short nCards
+		unsigned short isCrib
 
-	HAND *setup_hand(unsigned short ncards,
-		unsigned short *ranks,
-		char *suits)
-
-	void free_hand(HAND *h)
+	HAND *setupHand(unsigned short ncards)
+	HAND *copyHand(HAND h)
+	void freeHand(HAND *h)
 
 

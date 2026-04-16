@@ -3,5 +3,6 @@
 # License: MIT License. See LICENSE under top-level directory
 # at https://github.com/giganano/cribbagehelper.git
 
-__all__ = ["card"]
-from .core import card
+__all__ = []
+from .core import *
+__all__.extend(core.__all__)

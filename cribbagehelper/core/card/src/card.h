@@ -33,31 +33,6 @@ typedef struct card {
 
 } CARD;
 
-/*
-.. c:function: inline unsigned short card_count_value(CARD c);
-
-	Determine the numerical value that a card carries for the purposes of
-	identifying combinations that add up to 15. Jack, Queen, and King each
-	count as ten. For example, a King and a 5 count as 15, just like a Ten and
-	a 5.
-
-	Parameters
-	----------
-	c : `CARD`
-		The card itself.
-
-	Returns
-	-------
-	value : `unsigned short`
-		The numerical value between 1 and 10.
-*/
-inline unsigned short card_count_value(CARD c) {
-
-	/* jack, queen, and king each count as 10 when adding to 15 */
-	return c.rank > 10 ? 10 : c.rank;
-
-}
-
 #ifdef __cplusplus
 }
 #endif

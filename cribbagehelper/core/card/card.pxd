@@ -3,6 +3,7 @@
 # License: MIT License. See LICENSE under top-level directory
 # at https://github.com/giganano/cribbagehelper.git
 
-from .src cimport CARD, card_count_value
-cdef class card:
+from .src cimport CARD
+cdef class Card:
 	cdef CARD *c
+	cdef unsigned short _copy # if this object is a duplicate made for python purposes

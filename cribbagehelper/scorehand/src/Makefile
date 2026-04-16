@@ -3,7 +3,5 @@
 # License: MIT License. See LICENSE under top-level directory
 # at https://github.com/giganano/cribbagehelper.git
 
-cdef extern from "card.h":
-	ctypedef struct CARD:
-		unsigned int rank
-		char suit
+include ../../../common.mk
+THIS_DIR := "./cribbagehelper/scorehand/src"
