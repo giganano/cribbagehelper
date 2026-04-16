@@ -35,7 +35,7 @@ cdef class Hand:
 			* Functions and example code.
 	"""
 
-	def __cinit__(self, *args):
+	def __cinit__(self, *args, crib = False):
 		ranks = []
 		suits = []
 		for i, arg in enumerate(args):
@@ -48,7 +48,8 @@ cdef class Hand:
 			self.h[0].cards[i][0].rank = <unsigned short> ranks[i]
 			self.h[0].cards[i][0].suit = <char> ord(suits[i])
 
-	def __init__(self, *args): pass
+	def __init__(self, *args, crib = False):
+		self.crib = crib
 
 	def __dealloc__(self):
 		freeHand(self.h)
@@ -94,6 +95,64 @@ Index must be an integer. Received a floating point number: %.5e""" % (index))
 			raise IndexError("Index must be an integer. Got: %s" % (
 				type(index)))
 
-	def score(self):
-		return scoreHand(self.h[0])
+	@property
+	def crib(self):
+		r"""
+		Type : ``bool``
+
+		``True`` if this hand is a crib, but ``False`` if it is instead a
+		player's hand.
+		"""
+		return bool(self.h[0].isCrib)
+
+	@crib.setter
+	def crib(self, value):
+		if isinstance(value, bool):
+			self.h[0].isCrib = <unsigned short> value
+		else:
+			raise TypeError("Attribute 'crib' must be of type bool. Got: %s" % (
+				type(value)))
+
+	def score(self, heels = False, extra_info = False):
+		r"""
+		Compute the score of the hand.
+
+		Parameters
+		----------
+		heels : ``bool`` [default : False]
+			Whether or not to take into account "heels," which awards two points
+			to the dealer when the cut card is a Jack. As such, this variable
+			should be switched to ``True`` when the hand being scored belongs to
+			the dealer but remain ``False`` otherwise.
+
+			.. note:: "Heels" is also known as "nibs," or "knibs."
+
+		extra_info : ``bool`` [default : False]
+			If ``True``, returns a dictionary detailing how the points were
+			earned (see below). If ``False``, only the final total is returned.
+
+		.. todo::
+
+			- Finish docs on this function: describe returned object and write
+			  some example code.
+		"""
+		if not isinstance(heels, bool):
+			raise TypeError("\'heels\' must be of type \'bool.\' Got: %s" % (
+				type(heels)))
+		elif not isinstance(extra_info, bool):
+			raise TypeError("\'extra_info\' must be of type \'bool.\' Got: %s" % (
+				type(extra_info)))
+		else: pass
+		breakdown = {
+			"fifteens": fifteens(self.h[0]),
+			"flush": flush(self.h[0]),
+			"knobs": knobs(self.h[0]),
+			"pairs": pairs(self.h[0]),
+			"runs": runs(self.h[0])
+		}
+		if heels: breakdown["heels"] = _heels(self.h[0])
+		if extra_info:
+			return breakdown
+		else:
+			return sum([breakdown[key] for key in breakdown.keys()])
 
