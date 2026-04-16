@@ -13,7 +13,7 @@ See documentation of extern functions in flush.h
 extern unsigned short flush(HAND h) {
 
 	unsigned short suitsMatch = 1u;
-	for (unsigned short i = 1u; i < h.nCards - 1u; i++) {
+	for (unsigned short i = 1u; i <= h.nCards - 1u; i++) {
 		suitsMatch &= (*h.cards[i]).suit == (*h.cards[0]).suit;
 	}
 	if (suitsMatch && h.isCrib) {
