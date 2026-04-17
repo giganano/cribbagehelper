@@ -1,0 +1,18 @@
+
+{
+	"cribbagehelper.core.card.card": {
+		"include_directories": ["cribbagehelper/core/card/src"],
+		"source_directories": []
+	},
+	"cribbagehelper.core.hand.hand": {
+		"include_directories": [
+			"cribbagehelper/core/card/src",
+			"cribbagehelper/core/hand/src",
+			"cribbagehelper/scorehand/src"
+		],
+		"source_directories": [
+			"cribbagehelper/core/hand/src",
+			"cribbagehelper/scorehand/src"
+		]
+	}
+}

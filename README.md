@@ -13,42 +13,88 @@ statistically good choices to make in cribbage, a card game played with a
 standard 52-card deck.
 The source code is under development.
 
-### Intended Usage
+### Scoring Cribbage Hands
 
-Use `python -m cribbagehelper.scorehand` to compute the score of a hand.
-The cards in the hand can be specified with a rank, which should be one of the
-following: `a 2 3 4 5 6 7 8 9 t j q k`, and a suit, which should be one of the
-following: `c d h s`.
-The final of the five cards will be interpreted as the turn card, with the
-first four being in the dealt hand.
-For example:
+use `python -m cribbagehelper.scorehand` to compute the score of a hand.
+The cards in the hand are specified with a rank, which should be one of
+the following:
 
-```
-$ python -m cribbagehelper.scorehand 4s 5d 6h 6s qd
-14
-```
+	- a numerical value between 2 and 10 for numbered cards
+	- 'a' for an Ace
+	- 'j' for a Jack
+	- 'q' for a Queen
+	- 'k' for a King
 
-The hand to be scored is a 4 of spades, a 5 of diamonds, a 6 of hearts, and a
-6 of spades, with a queen of diamonds turned up from cutting the deck.
-This hand is worth 14 points: six through combinations of cards that add up to
-15, two runs of three consecutive ranks (4-5-6) worth three points, and a pair
-of 6's worth two points.
-The 4-5-6-6 combination is often referred to as a "double run."
+and a suit, which should be one of the following
 
-Use `python -m cribbagehelper.splithand` to identify the best cards to give to
-the crib:
+	- 'c' for Clubs
+	- 'd' for Diamonds
+	- 'h' for Hearts
+	- 's' for Spades
+
+Simply place the cards after the call to `scorehand`:
 
 ```
-$ python -m cribbagehelper.splithand 4s 5s 6h 6s as kd [--theirs] [--mine]
+$ python -m cribbagehelper.scorehand 4s 4h 5d 6c 6d
+24
 ```
 
-The format output from this function is to be determined.
+The final card specified is assumed to be the cut card.
+Otherwise, the order of the preceding cards is of no consequence.
 
+A breakdown of the score can be printed with `-i` or `--extra-info`:
+
+```
+$ python -m cribbagehelper.scorehand js 5c 5d 5h 5s --extra-info
+Total points: 29
+ - from fifteens: 16
+ - from flush: 0
+ - from knobs: 1
+ - from pairs: 12
+ - from runs: 0
+```
+
+Additional flags:
+
+	- `-c`, `--crib`: Specifies that the hand being scored is a crib (i.e., the
+		bonus hand of four cards reserved for the dealer).
+	- `-d`, `--dealer`: Specifies that the hand being scored belongs to the
+		dealer. An additional two points is awarded to the dealer when the cut
+		card is a Jack.
+
+### Forecast
+
+**Under Development**
+
+For a given hand of four cards, determine the score of all possible outcomes
+associated with all 48 possible cut cards.
+
+```
+$ python -m cribbagehelper.forecast 10c 10d 5h 5d
+```
+
+The output will convey, in some undetermined format, the best, worst, and
+range of likely outcomes.
+
+### Recommend a choice in splitting a player's hand
+
+**Under Development**
+
+For a given hand of five or six cards, determine the statistically best
+choice of cards to discard to the crib.
+
+```
+$ python -m cribbagehelper.splithand 4c 5d 5s 6h qs jh --mycrib
+```
+
+For such a hand, the recommendation should clearly be to put the Jack and
+Queen in your own crib and keep the high point value double run intact.
+This function will reach that conclusion using a probabilistic, programmatic
+approach.
 
 ### Developers: To-Do
 
 <ul>
-	<li>Setup package infrastructure</li>
-	<li>Setup command-line API</li>
-	<li>Setup basic backend objects</li>
+	<li>Setup Documentation</li>
+	<li>Setup CI Testing</li>
 </ul>
