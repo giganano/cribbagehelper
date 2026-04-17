@@ -46,6 +46,11 @@ jobs:
             rm -f err.out
           fi
 
+      - name: Run Tests
+        shell: bash
+        run: |
+          python -m pytest cribbagehelper
+
       - name: Cleanup
         shell: bash
         run: |
