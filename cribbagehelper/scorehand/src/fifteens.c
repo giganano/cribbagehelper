@@ -22,8 +22,6 @@ extern unsigned short fifteens(HAND h) {
 	for (unsigned short n = 2u; n < h.nCards; n++) {
 		HAND **combos = subsets(h, n);
 		for (unsigned long i = 0ul; i < choose(h.nCards, n); i++) {
-			unsigned short *values = (unsigned short *) malloc (
-				n * sizeof(unsigned short));
 			unsigned short sum = 0u;
 			for (unsigned short j = 0u; j < n; j++) {
 				sum += cardCountValue(*(*combos[i]).cards[j]);
