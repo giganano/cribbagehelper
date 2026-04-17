@@ -11,4 +11,6 @@ distclean:
 	@ if [ -d "cribbagehelper.egg-info" ] ; then \
 		rm -rf cribbagehelper.egg-info ; \
 	fi
-	@ $(MAKE) clean
+	@ if [ -d "build" ] ; then \
+		rm -rf build ; \
+	fi
