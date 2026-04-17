@@ -50,4 +50,5 @@ jobs:
         shell: bash
         run: |
           make clean distclean clibclean
+          ls -lha
 
