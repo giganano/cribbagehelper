@@ -19,7 +19,7 @@ static unsigned short cardCountValue(CARD c);
 extern unsigned short fifteens(HAND h) {
 
 	unsigned short total = 0u;
-	for (unsigned short n = 2u; n < h.nCards; n++) {
+	for (unsigned short n = 2u; n <= h.nCards; n++) {
 		HAND **combos = subsets(h, n);
 		for (unsigned long i = 0ul; i < choose(h.nCards, n); i++) {
 			unsigned short sum = 0u;
