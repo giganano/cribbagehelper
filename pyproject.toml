@@ -42,3 +42,5 @@ classifiers = [
 Repository = "https://github.com/giganano/cribbagehelper"
 Issues = "https://github.com/giganano/cribbagehelper/issues"
 
+[project.optional-dependencies]
+dev = "pytest >= 7.0"

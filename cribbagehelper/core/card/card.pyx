@@ -112,6 +112,10 @@ or spades, respectively. Got: %s""" % (identifier[-1]))
 			self._SUIT_NAMES_[self.suit].capitalize()
 			)
 
+	def __eq__(self, Card other):
+		return (self.c[0].rank == other.c[0].rank and
+			self.c[0].suit == other.c[0].suit)
+
 	@property
 	def rank(self):
 		r"""
