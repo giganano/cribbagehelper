@@ -12,6 +12,7 @@ from ...scorehand.scoreBundle import (ScoreBundleFifteens, ScoreBundleFlush,
 from libc.stdlib cimport malloc, free
 from libc.stdio cimport printf
 import numbers
+import json
 
 cdef class Hand:
 
@@ -135,7 +136,7 @@ Item assignment requires a \'Card\' object or a string. Got: %s""" % (
 			raise TypeError("Attribute 'crib' must be of type bool. Got: %s" % (
 				type(value)))
 
-	def score(self, heels = False, extra_info = False):
+	def score(self, heels = False, extra_info = False, to_json = False):
 		r"""
 		Compute the score of the hand.
 
@@ -156,7 +157,7 @@ Item assignment requires a \'Card\' object or a string. Got: %s""" % (
 		.. todo::
 
 			- Finish docs on this function: describe returned object and write
-			  some example code.
+			  some example code. ``to_json`` keyword arg.
 		"""
 		if not isinstance(heels, bool):
 			raise TypeError("\'heels\' must be of type \'bool.\' Got: %s" % (
@@ -176,7 +177,13 @@ Item assignment requires a \'Card\' object or a string. Got: %s""" % (
 		}
 		if heels: breakdown["heels"] = ScoreBundleHeels(self)
 		total = sum([int(breakdown[key]) for key in breakdown.keys()])
-		if extra_info:
+		if to_json:
+			output = {}
+			output["total"] = total
+			for key in breakdown.keys():
+				output[key] = breakdown[key].to_json()
+			return json.dumps(output)
+		elif extra_info:
 			breakdown["total"] = total
 			return breakdown
 		else:

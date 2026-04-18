@@ -11,6 +11,7 @@ from . cimport scoreBundle
 from .src cimport fifteens, flush, heels, knobs, pairs, runs
 from ..core.card cimport Card
 from ..core.hand cimport Hand
+import json
 
 cdef class ScoreBundle:
 
@@ -50,6 +51,28 @@ cdef class ScoreBundle:
 
 	def __int__(self):
 		return 0
+
+	def to_json(self):
+		r"""
+		Export this scoreBundle as a JSON object. For use in formatting
+		user interfaces.
+
+		.. warning:: User access discouraged.
+		"""
+		output = {}
+		output["nCombinations"] = self.sb[0].nCombinations
+		output["combinations"] = []
+		for i in range(self.sb[0].nCombinations):
+			output["combinations"].append({
+				"nCards": self.sb[0].nCards[i],
+				"cards": []
+				})
+			for j in range(self.sb[0].nCards[i]):
+				r = Card._RANK_TO_NAME_[self.sb[0].cards[i][j][0].rank]
+				if not r.isdigit(): r = r[0]
+				s = chr(self.sb[0].cards[i][j][0].suit)
+				output["combinations"][i]["cards"].append("%s%s" % (r, s))
+		return json.dumps(output)
 
 
 cdef class ScoreBundleFifteens(ScoreBundle):
