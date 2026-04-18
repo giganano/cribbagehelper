@@ -6,6 +6,13 @@
 THIS_DIR = "."
 include common.mk
 
+clean: pytestclean
+.PHONY: pytestclean
+pytestclean:
+	@ if [ -d ".pytest_cache" ] ; then \
+		rm -rf .pytest_cache ; \
+	fi
+
 .PHONY: distclean
 distclean:
 	@ if [ -d "cribbagehelper.egg-info" ] ; then \

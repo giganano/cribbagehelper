@@ -95,6 +95,25 @@ Index must be an integer. Received a floating point number: %.5e""" % (index))
 			raise IndexError("Index must be an integer. Got: %s" % (
 				type(index)))
 
+	def __iter__(self):
+		for i in range(self.__len__()):
+			yield self.__getitem__(i)
+
+	def __setitem__(self, key, value):
+		if isinstance(value, Card):
+			c = self.__getitem__(key)
+			c.rank = value.rank
+			c.suit = value.suit
+		elif isinstance(value, str):
+			value = Card(value)
+			c = self.__getitem__(key)
+			c.rank = value.rank
+			c.suit = value.suit
+		else:
+			raise TypeError("""\
+Item assignment requires a \'Card\' object or a string. Got: %s""" % (
+				type(value)))
+
 	@property
 	def crib(self):
 		r"""

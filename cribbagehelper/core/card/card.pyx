@@ -124,7 +124,7 @@ or spades, respectively. Got: %s""" % (identifier[-1]))
 		The rank of the playing card. 1 for Ace, 11 for Jack, 12 for Queen, 13 for
 		King, and otherwise the numerical value of the card.
 		"""
-		return self.c[0].rank
+		return Rank(self.c[0].rank)
 
 	@rank.setter
 	def rank(self, value):
@@ -186,3 +186,27 @@ Got: \"%s\"""" % (value))
 Card suit must be a one-character string. Got: %s""" % (type(value)))
 
 
+class Rank(int):
+
+	r"""
+	An integer subclass modified for the sake of playing card ranks.
+	By type-casting these integers to strings, 1 becomes 'a' for Ace,
+	11 becomes 'j' for Jack, 12 becomes 'q' for Queen, and 13 becomes
+	'k' for King.
+
+	.. todo:: docs
+	"""
+
+	def __str__(self):
+		if self in [1, 11, 12, 13]:
+			return {
+				1: 'a',
+				11: 'j',
+				12: 'q',
+				13: 'k'
+			}[self]
+		else:
+			return super().__str__()
+
+	def __repr__(self):
+		return "Card.Rank(%s)" % (int.__repr__(self))
