@@ -3,32 +3,37 @@
 # License: MIT License. See LICENSE under top-level directory
 # at: https://github.com/giganano/cribbagehelper.git
 
-from ...core cimport HAND
+from ...core cimport CARD, HAND
+
+cdef extern from "./score.h":
+	ctypedef struct SCOREBUNDLE:
+		CARD ***cards
+		unsigned short *nCards
+		unsigned short nCombinations
+
+	SCOREBUNDLE *setupScoreBundle()
+	void freeScoreBundle(SCOREBUNDLE *sb)
+	void addScoreBundle(SCOREBUNDLE *sb, HAND *combo, unsigned short nCards)
 
 cdef extern from "./fifteens.h":
-	unsigned short fifteens(HAND h)
+	SCOREBUNDLE *fifteens(HAND h)
 
 
 cdef extern from "./flush.h":
-	unsigned short flush(HAND h)
+	SCOREBUNDLE *flush(HAND h)
 
 
 cdef extern from "./heels.h":
-	unsigned short heels(HAND h)
+	SCOREBUNDLE *heels(HAND h)
 
 
 cdef extern from "./knobs.h":
-	unsigned short knobs(HAND h)
+	SCOREBUNDLE *knobs(HAND h)
 
 
 cdef extern from "./pairs.h":
-	unsigned short pairs(HAND h)
+	SCOREBUNDLE *pairs(HAND h)
 
 
 cdef extern from "./runs.h":
-	unsigned short runs(HAND h)
-
-
-cdef extern from "./score.h":
-	unsigned short scoreHand(HAND h)
-
+	SCOREBUNDLE *runs(HAND h)

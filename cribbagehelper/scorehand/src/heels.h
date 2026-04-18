@@ -13,9 +13,10 @@ extern "C" {
 
 #include "../../core/card/src/card.h"
 #include "../../core/hand/src/hand.h"
+#include "score.h"
 
 /*
-.. c:function:: inline unsigned short heels(HAND h);
+.. c:function:: extern SCOREBUNDLE *heels(HAND h);
 
 	Determine the number of points in the hand due to heels, which arises
 	when a Jack is turned up when the deck is cut and awards two points.
@@ -27,15 +28,13 @@ extern "C" {
 
 	Returns
 	-------
-	points : ``unsigned short``
-		2 if the final card in the hand (interpreted as the turn card), has a
-		rank value of 11. 0 otherwise.
+	sb : ``SCOREBUNDLE *``
+		A ``SCOREBUNDLE`` object containing the cut card if it is a Jack.
+		Empty bundle otherwise.
+
+		.. seealso:: cribbagehelper/scorehand/src/score.h
 */
-inline unsigned short heels(HAND h) {
-
-	return 2u * ((*h.cards[h.nCards - 1u]).rank == 11u);
-
-}
+extern SCOREBUNDLE *heels(HAND h);
 
 #ifdef __cplupslus
 }

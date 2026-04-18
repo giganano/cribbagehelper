@@ -3,4 +3,7 @@
 # License: MIT License. See LICENSE under top-level directory
 # at: https://github.com/giganano/cribbagehelper.git
 
-from .src cimport fifteens, flush, heels, knobs, pairs, runs, scoreHand
+from .src cimport (SCOREBUNDLE, setupScoreBundle, freeScoreBundle,
+	addScoreBundle, fifteens, flush, heels, knobs, pairs, runs)
+from .scoreBundle cimport (ScoreBundle, ScoreBundleFifteens, ScoreBundleFlush,
+	ScoreBundleHeels, ScoreBundleKnobs, ScoreBundlePairs, ScoreBundleRuns)

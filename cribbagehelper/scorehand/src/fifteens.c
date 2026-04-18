@@ -16,9 +16,9 @@ See documentation of extern functions in fifteens.h
 static unsigned short cardCountValue(CARD c);
 
 
-extern unsigned short fifteens(HAND h) {
+extern SCOREBUNDLE *fifteens(HAND h) {
 
-	unsigned short total = 0u;
+	SCOREBUNDLE *sb = setupScoreBundle();
 	for (unsigned short n = 2u; n <= h.nCards; n++) {
 		HAND **combos = subsets(h, n);
 		for (unsigned long i = 0ul; i < choose(h.nCards, n); i++) {
@@ -26,12 +26,14 @@ extern unsigned short fifteens(HAND h) {
 			for (unsigned short j = 0u; j < n; j++) {
 				sum += cardCountValue(*(*combos[i]).cards[j]);
 			}
-			if (sum == 15u) total += 2u;
+			if (sum == 15u) {
+				addScoreCombo(sb, combos[i], n);
+			} else {}
 			freeHand(combos[i]);
 		}
 		free(combos);
 	}
-	return total;
+	return sb;
 
 }
 

@@ -13,9 +13,10 @@ extern "C" {
 
 #include "../../core/card/src/card.h"
 #include "../../core/hand/src/hand.h"
+#include "score.h"
 
 /*
-.. c:function:: extern unsigned short knobs(HAND h);
+.. c:function:: extern SCOREBUNDLE *knobs(HAND h);
 
 	Determine the number of points in the nand from knobs, which awards
 	one point when a jack matches the suit of the turn card.
@@ -27,11 +28,13 @@ extern "C" {
 
 	Returns
 	-------
-	points : ``unsigned short``
-		1 if any of the cards (other than the turn card) is a jack whose
-		suit matches the turn card. 0 otherwise.
+	sb : ``SCOREBUNDLE *``
+		A ``SCOREBUNDLE`` object containing the Jack in the hand whose suit
+		matches the cut card, if applicable. Empty bundle otherwise.
+
+		.. seealso:: cribbagehelper/scorehand/src/score.h
 */
-extern unsigned short knobs(HAND h);
+extern SCOREBUNDLE *knobs(HAND h);
 
 #ifdef __cplupslus
 }

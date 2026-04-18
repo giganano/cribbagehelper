@@ -5,7 +5,10 @@
 
 __all__ = ["Hand"]
 from . cimport hand
+from .src cimport setupHand, freeHand
 from ..card cimport Card, CARD
+from ...scorehand.scoreBundle import (ScoreBundleFifteens, ScoreBundleFlush,
+	ScoreBundleHeels, ScoreBundleKnobs, ScoreBundlePairs, ScoreBundleRuns)
 from libc.stdlib cimport malloc, free
 from libc.stdio cimport printf
 import numbers
@@ -162,16 +165,19 @@ Item assignment requires a \'Card\' object or a string. Got: %s""" % (
 			raise TypeError("\'extra_info\' must be of type \'bool.\' Got: %s" % (
 				type(extra_info)))
 		else: pass
+
 		breakdown = {
-			"fifteens": fifteens(self.h[0]),
-			"flush": flush(self.h[0]),
-			"knobs": knobs(self.h[0]),
-			"pairs": pairs(self.h[0]),
-			"runs": runs(self.h[0])
+			"fifteens": ScoreBundleFifteens(self),
+			"flush": ScoreBundleFlush(self),
+			"heels": ScoreBundleHeels(self),
+			"knobs": ScoreBundleKnobs(self),
+			"pairs": ScoreBundlePairs(self),
+			"runs": ScoreBundleRuns(self)
 		}
-		if heels: breakdown["heels"] = _heels(self.h[0])
+		if heels: breakdown["heels"] = ScoreBundleHeels(self)
+		total = sum([int(breakdown[key]) for key in breakdown.keys()])
 		if extra_info:
+			breakdown["total"] = total
 			return breakdown
 		else:
-			return sum([breakdown[key] for key in breakdown.keys()])
-
+			return total

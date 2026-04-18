@@ -14,5 +14,16 @@
 			"cribbagehelper/core/hand/src",
 			"cribbagehelper/scorehand/src"
 		]
+	},
+	"cribbagehelper.scorehand.scoreBundle": {
+		"include_directories": [
+			"cribbagehelper/core/card/src",
+			"cribbagehelper/core/hand/src",
+			"cribbagehelper/scorehand/src"
+		],
+		"source_directories": [
+			"cribbagehelper/core/hand/src",
+			"cribbagehelper/scorehand/src"
+		]
 	}
 }

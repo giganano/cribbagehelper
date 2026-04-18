@@ -13,9 +13,10 @@ extern "C" {
 
 #include "../../core/card/src/card.h"
 #include "../../core/hand/src/hand.h"
+#include "score.h"
 
 /*
-.. c:function:: extern unsigned short flush(HAND h);
+.. c:function:: extern SCOREBUNDLE *flush(HAND h);
 
 	Determine the number of points from a flush or lack thereof in a given hand.
 	If the hand in question is a crib, then all five suits must match for a
@@ -30,10 +31,12 @@ extern "C" {
 
 	Returns
 	-------
-	points : ``unsigned short``
-		The number of points in the hand that come from a flush.
+	sb : ``SCOREBUNDLE *``
+		A ``SCOREBUNDLE`` object containing each card of a matching suit.
+
+		.. seealso:: cribbagehelper/scorehand/src/score.h
 */
-extern unsigned short flush(HAND h);
+extern SCOREBUNDLE *flush(HAND h);
 
 #ifdef __cplupslus
 }
