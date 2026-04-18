@@ -22,6 +22,11 @@ print_message:
 %.o: %.c $(C_HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+.PHONY: tests
+tests:
+	@ echo Running Unit Tests....
+	@ python -m pytest cribbagehelper
+
 .PHONY: clib
 clib:
 	@ echo Compiling C code in $(THIS_DIR)
@@ -58,7 +63,7 @@ clean:
 	@ for i in $(SHARED_OBJECTS) ; do \
 		rm -f $$i ; \
 	done
-	for i in $(C_OUTPUTS) ; do \
+	@ for i in $(C_OUTPUTS) ; do \
 		rm -f $$i ; \
 	done
 	@ for i in $(SUBDIRS) ; do \
