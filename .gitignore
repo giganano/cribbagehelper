@@ -6,4 +6,5 @@
 cribbagehelper.egg-info/**
 cribbagehelper/core/card/card.c
 cribbagehelper/core/hand/hand.c
+cribbagehelper/scorehand/scoreBundle.c
 
