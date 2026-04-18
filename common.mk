@@ -22,6 +22,16 @@ print_message:
 %.o: %.c $(C_HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+.PHONY: clib
+clib:
+	@ echo Compiling C code in $(THIS_DIR)
+	@ for i in $(C_OUTPUTS) ; do \
+		$(MAKE) $$i ; \
+	done
+	@ for i in $(SUBDIRS) ; do \
+		$(MAKE) -C $$i clib ; \
+	done
+
 .PHONY: $(SUBDIRS)
 $(SUBDIRS):
 	@ $(MAKE) -C $@
