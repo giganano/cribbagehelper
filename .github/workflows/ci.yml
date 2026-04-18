@@ -56,7 +56,7 @@ jobs:
       - name: Run Tests
         shell: bash
         run: |
-          python -m pytest cribbagehelper
+          make tests
 
       - name: Cleanup
         if: always()
