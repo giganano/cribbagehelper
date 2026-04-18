@@ -58,7 +58,7 @@ clean:
 	@ for i in $(SHARED_OBJECTS) ; do \
 		rm -f $$i ; \
 	done
-	@ for i in $(C_OUPUTS) ; do \
+	for i in $(C_OUTPUTS) ; do \
 		rm -f $$i ; \
 	done
 	@ for i in $(SUBDIRS) ; do \
