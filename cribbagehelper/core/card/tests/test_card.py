@@ -41,6 +41,43 @@ def test_card_rank_setter():
 			assert isinstance(test.rank, int)
 			assert test.rank == i + 1
 
+def test_card_rank_subclass():
+	r"""
+	Ensures that the desired type-cast to string behaves properly for
+	card ranks.
+	"""
+	try:
+		test = Card("as")
+	except:
+		pytest.skip("Card.__init__ failed.")
+	assert test.rank == 1
+	assert str(test.rank) == 'a'
+	try:
+		test.rank = 2
+	except:
+		pytest.skip("Card.rank.setter failed.")
+	assert test.rank == 2
+	assert str(test.rank) == "Card.Rank(2)"
+	try:
+		test.rank = 11
+	except:
+		pytest.skip("Card.rank.setter failed.")
+	assert test.rank == 11
+	assert str(test.rank) == 'j'
+	try:
+		test.rank = 12
+	except:
+		pytest.skip("Card.rank.setter failed.")
+	assert test.rank == 12
+	assert str(test.rank) == 'q'
+	try:
+		test.rank = 13
+	except:
+		pytest.skip("Card.rank.setter failed.")
+	assert test.rank == 13
+	assert str(test.rank) == 'k'
+
+
 def test_card_suit_setter():
 	r"""
 	Ensures that the Card.suit setter function accepts all of the proper
