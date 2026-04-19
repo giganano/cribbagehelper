@@ -19,7 +19,7 @@ static unsigned short *quicksort(unsigned short *input, unsigned short length);
 static unsigned short consecutive(unsigned short *input, unsigned short length);
 
 
-extern SCOREBUNDLE *runs(HAND h) {
+extern SCOREBUNDLE *findRuns(HAND h) {
 
 	SCOREBUNDLE *sb = setupScoreBundle();
 	unsigned short length = h.nCards;
@@ -54,6 +54,17 @@ extern SCOREBUNDLE *runs(HAND h) {
 		length--;
 	}
 	return sb;
+
+}
+
+
+extern unsigned short scoreRuns(SCOREBUNDLE sb) {
+
+	unsigned short total = 0u;
+	for (unsigned short i = 0u; i < sb.nCombinations; i++) {
+		total += sb.nCards[i];
+	}
+	return total;
 
 }
 

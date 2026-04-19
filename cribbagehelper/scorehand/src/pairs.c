@@ -12,7 +12,7 @@ See documentation of extern functions in pairs.h
 #include "pairs.h"
 #include "subsets.h"
 
-extern SCOREBUNDLE *pairs(HAND h) {
+extern SCOREBUNDLE *findPairs(HAND h) {
 
 	SCOREBUNDLE *sb = setupScoreBundle();
 	HAND **twoCardCombos = subsets(h, 2u);
@@ -25,6 +25,13 @@ extern SCOREBUNDLE *pairs(HAND h) {
 	}
 	free(twoCardCombos);
 	return sb;
+
+}
+
+
+extern unsigned short scorePairs(SCOREBUNDLE sb) {
+
+	return 2u * sb.nCombinations;
 
 }
 

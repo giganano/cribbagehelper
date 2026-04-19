@@ -10,6 +10,46 @@ See documentation of extern functions in score.h
 
 #include <stdlib.h>
 #include "score.h"
+#include "fifteens.h"
+#include "flush.h"
+#include "heels.h"
+#include "knobs.h"
+#include "pairs.h"
+#include "runs.h"
+
+
+extern unsigned short scoreHand(HAND h) {
+
+	SCOREBUNDLE *fif = findFifteens(h);
+	SCOREBUNDLE *flu = findFlush(h);
+	SCOREBUNDLE *kno = findKnobs(h);
+	SCOREBUNDLE *pai = findPairs(h);
+	SCOREBUNDLE *run = findRuns(h);
+	SCOREBUNDLE *hee;
+	if (h.isCrib) {
+		hee = NULL;
+	} else {
+		hee = findHeels(h);
+	}
+
+	unsigned short total = 0u;
+	total += scoreFifteens(*fif);
+	total += scoreFlush(*flu);
+	total += scoreKnobs(*kno);
+	total += scorePairs(*pai);
+	total += scoreRuns(*run);
+	if (h.isCrib) total += scoreHeels(*hee);
+
+	free(fif);
+	free(flu);
+	free(kno);
+	free(pai);
+	free(run);
+	if (h.isCrib) free(hee);
+
+	return total;
+
+}
 
 
 extern SCOREBUNDLE *setupScoreBundle(void) {

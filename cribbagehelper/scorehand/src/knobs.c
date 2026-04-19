@@ -11,7 +11,7 @@ See documentation of extern functions in knobs.h
 #include <stdlib.h>
 #include "knobs.h"
 
-extern SCOREBUNDLE *knobs(HAND h) {
+extern SCOREBUNDLE *findKnobs(HAND h) {
 
 	SCOREBUNDLE *sb = setupScoreBundle();
 	for (unsigned short i = 0u; i < h.nCards - 1u; i++) {
@@ -31,3 +31,11 @@ extern SCOREBUNDLE *knobs(HAND h) {
 	return sb;
 
 }
+
+
+extern unsigned short scoreKnobs(SCOREBUNDLE sb) {
+
+	return sb.nCombinations;
+
+}
+

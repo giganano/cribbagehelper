@@ -18,8 +18,9 @@ extern "C" {
 /*
 .. c:function:: extern SCOREBUNDLE *runs(HAND h);
 
-	Compute the number of points in the hand from runs, referring to three
-	cards or more of consecutive rank (e.g., ace-two-three, nine-ten-Jack).
+	Identify the longest possible combinations of cards of consecutive rank,
+	starting with a minimum length of three cards (e.g., ace-two-three,
+	nine-ten-jack-queen, but not eight-nine).
 
 	Parameters
 	----------
@@ -43,10 +44,37 @@ extern "C" {
 
 	.. seealso:: cribbagehelper/scorehand/src/pairs.h
 */
-extern SCOREBUNDLE *runs(HAND h);
+extern SCOREBUNDLE *findRuns(HAND h);
+
+/*
+.. c:function:: extern unsigned short scoreRuns(SCOREBUNDLE sb);
+
+	Compute the number of points earned through runs.
+
+	Parameters
+	----------
+	sb : ``SCOREBUNDLE``
+		A ``SCOREBUNDLE`` object containing the combinations of
+		conseuctively-ranked cards, as returned by ``runs``.
+
+		.. seealso:: cribbagehelper/scorehand/src/score.h
+
+	Returns
+	-------
+	points : ``unsigned short``
+		The sum total of the length of each run.
+
+	Notes
+	-----
+	This routine, in combination with cribbagehelper's pair detection
+	algorithm, naturally account for so-called "double runs" and "triple runs"
+	with duplicate instances of a given rank (e.g., seven-seven-eight-eight-nine).
+
+	.. seealso:: cribbagehelper/scorehand/src/pairs.h
+*/
+extern unsigned short scoreRuns(SCOREBUNDLE sb);
 
 #ifdef __cplupslus
 }
 #endif /* __cplusplus */
-
 

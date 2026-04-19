@@ -11,29 +11,37 @@ cdef extern from "./score.h":
 		unsigned short *nCards
 		unsigned short nCombinations
 
+	unsigned short scoreHand(HAND h)
 	SCOREBUNDLE *setupScoreBundle()
 	void freeScoreBundle(SCOREBUNDLE *sb)
 	void addScoreBundle(SCOREBUNDLE *sb, HAND *combo, unsigned short nCards)
 
+
 cdef extern from "./fifteens.h":
-	SCOREBUNDLE *fifteens(HAND h)
+	SCOREBUNDLE *findFifteens(HAND h)
+	unsigned short scoreFifteens(SCOREBUNDLE sb)
 
 
 cdef extern from "./flush.h":
-	SCOREBUNDLE *flush(HAND h)
+	SCOREBUNDLE *findFlush(HAND h)
+	unsigned short scoreFlush(SCOREBUNDLE sb)
 
 
 cdef extern from "./heels.h":
-	SCOREBUNDLE *heels(HAND h)
+	SCOREBUNDLE *findHeels(HAND h)
+	unsigned short scoreHeels(SCOREBUNDLE sb)
 
 
 cdef extern from "./knobs.h":
-	SCOREBUNDLE *knobs(HAND h)
+	SCOREBUNDLE *findKnobs(HAND h)
+	unsigned short scoreKnobs(SCOREBUNDLE sb)
 
 
 cdef extern from "./pairs.h":
-	SCOREBUNDLE *pairs(HAND h)
+	SCOREBUNDLE *findPairs(HAND h)
+	unsigned short scorePairs(SCOREBUNDLE sb)
 
 
 cdef extern from "./runs.h":
-	SCOREBUNDLE *runs(HAND h)
+	SCOREBUNDLE *findRuns(HAND h)
+	unsigned short scoreRuns(SCOREBUNDLE sb)

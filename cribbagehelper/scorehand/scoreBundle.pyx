@@ -8,7 +8,9 @@ __all__ = ["ScoreBundle", "ScoreBundleFifteens", "ScoreBundleFlush",
 	"ScoreBundleRuns"]
 
 from . cimport scoreBundle
-from .src cimport fifteens, flush, heels, knobs, pairs, runs
+from .src cimport (findFifteens, scoreFifteens, findFlush, scoreFlush,
+	findHeels, scoreHeels, findKnobs, scoreKnobs, findPairs, scorePairs,
+	findRuns, scoreRuns)
 from ..core.card cimport Card
 from ..core.hand cimport Hand
 import json
@@ -78,22 +80,20 @@ cdef class ScoreBundle:
 cdef class ScoreBundleFifteens(ScoreBundle):
 
 	def __cinit__(self, Hand hand):
-		self.sb = fifteens(hand.h[0])
+		self.sb = findFifteens(hand.h[0])
 
 	def __int__(self):
-		return 2 * self.sb[0].nCombinations
+		return scoreFifteens(self.sb[0])
 
 
 cdef class ScoreBundleFlush(ScoreBundle):
 
 	def __cinit__(self, Hand hand):
-		self.sb = flush(hand.h[0])
+		self.sb = findFlush(hand.h[0])
 
 	def __int__(self):
-		if self.sb[0].nCombinations == 1:
-			return self.sb[0].nCards[0]
-		elif self.sb[0].nCombinations == 0:
-			return 0
+		if self.sb[0].nCombinations <= 1:
+			return scoreFlush(self.sb[0])
 		else:
 			raise SystemError("Internal Error: >1 flush combination returned.")
 
@@ -101,11 +101,11 @@ cdef class ScoreBundleFlush(ScoreBundle):
 cdef class ScoreBundleHeels(ScoreBundle):
 
 	def __cinit__(self, Hand hand):
-		self.sb = heels(hand.h[0])
+		self.sb = findHeels(hand.h[0])
 
 	def __int__(self):
 		if self.sb[0].nCombinations <= 1:
-			return 2 * self.sb[0].nCombinations
+			return scoreHeels(self.sb[0])
 		else:
 			raise SystemError("Internal Error: >1 heels combination returned.")
 
@@ -113,11 +113,11 @@ cdef class ScoreBundleHeels(ScoreBundle):
 cdef class ScoreBundleKnobs(ScoreBundle):
 
 	def __cinit__(self, Hand hand):
-		self.sb = knobs(hand.h[0])
+		self.sb = findKnobs(hand.h[0])
 
 	def __int__(self):
 		if self.sb[0].nCombinations <= 1:
-			return self.sb[0].nCombinations
+			return scoreKnobs(self.sb[0])
 		else:
 			raise SystemError("Internal Error: >1 knobs combination returned.")
 
@@ -125,19 +125,16 @@ cdef class ScoreBundleKnobs(ScoreBundle):
 cdef class ScoreBundlePairs(ScoreBundle):
 
 	def __cinit__(self, Hand hand):
-		self.sb = pairs(hand.h[0])
+		self.sb = findPairs(hand.h[0])
 
 	def __int__(self):
-		return 2 * self.sb[0].nCombinations
+		return scorePairs(self.sb[0])
 
 
 cdef class ScoreBundleRuns(ScoreBundle):
 
 	def __cinit__(self, Hand hand):
-		self.sb = runs(hand.h[0])
+		self.sb = findRuns(hand.h[0])
 
 	def __int__(self):
-		total = 0
-		for i in range(self.sb[0].nCombinations):
-			total += self.sb[0].nCards[i]
-		return total
+		return scoreRuns(self.sb[0])

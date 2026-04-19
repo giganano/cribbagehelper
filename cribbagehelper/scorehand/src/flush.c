@@ -10,7 +10,7 @@ See documentation of extern functions in flush.h
 
 #include "flush.h"
 
-extern SCOREBUNDLE *flush(HAND h) {
+extern SCOREBUNDLE *findFlush(HAND h) {
 
 	SCOREBUNDLE *sb = setupScoreBundle();
 
@@ -29,6 +29,13 @@ extern SCOREBUNDLE *flush(HAND h) {
 	} else {}
 
 	return sb;
+
+}
+
+
+extern unsigned short scoreFlush(SCOREBUNDLE sb) {
+
+	return sb.nCombinations > 0 ? sb.nCards[0] : 0u;
 
 }
 

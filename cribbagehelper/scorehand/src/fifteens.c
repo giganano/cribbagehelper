@@ -16,7 +16,7 @@ See documentation of extern functions in fifteens.h
 static unsigned short cardCountValue(CARD c);
 
 
-extern SCOREBUNDLE *fifteens(HAND h) {
+extern SCOREBUNDLE *findFifteens(HAND h) {
 
 	SCOREBUNDLE *sb = setupScoreBundle();
 	for (unsigned short n = 2u; n <= h.nCards; n++) {
@@ -36,6 +36,14 @@ extern SCOREBUNDLE *fifteens(HAND h) {
 	return sb;
 
 }
+
+
+extern unsigned short scoreFifteens(SCOREBUNDLE sb) {
+
+	return 2u * sb.nCombinations;
+
+}
+
 
 /*
 .. c:function: inline unsigned short cardCountValue(CARD c);

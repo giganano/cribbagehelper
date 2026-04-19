@@ -18,8 +18,8 @@ extern "C" {
 /*
 .. c:function:: extern SCOREBUNDLE *fifteens(HAND h);
 
-	Count up all the points in the hand from fifteens (i.e., combinations
-	of two cards whose point values add up to 15).
+	Find all combinations of cards in a given hand that add up to a
+	value of fifteen, each of which awards two points.
 
 	Parameters
 	----------
@@ -39,7 +39,28 @@ extern "C" {
 	For these purposes, the jack, queen, and king each have a point value of 10
 	(e.g., a king and a five add up to 15 as opposed to 18).
 */
-extern SCOREBUNDLE *fifteens(HAND h);
+extern SCOREBUNDLE *findFifteens(HAND h);
+
+/*
+.. c:function:: extern unsigned short scoreFifteens(SCOREBUNDLE sb);
+
+	Count up all the points in the hand from fifteens (i.e., combinations
+	of two cards whose point values add up to 15).
+
+	Parameters
+	----------
+	sb : ``SCOREBUNDLE``
+		A ``SCOREBUNDLE`` object containing all of the corresponding
+		combinations of cards, as returned by ``fifteens``.
+
+		.. seealso:: cribbagehelper/scorehand/src/score.h
+
+	Returns
+	-------
+	points : ``unsigned short``
+		The number of combinations of cards in the ``SCOREBUNDLE`` times two.
+*/
+extern unsigned short scoreFifteens(SCOREBUNDLE sb);
 
 #ifdef __cplusplus
 }

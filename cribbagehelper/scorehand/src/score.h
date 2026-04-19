@@ -14,6 +14,42 @@ extern "C" {
 #include "../../core/card/src/card.h"
 #include "../../core/hand/src/hand.h"
 
+/* The maximum possible score of a 5-card hand */
+#ifndef MAXIMUM_POSSIBLE_SCORE_5CARDS
+#define MAXIMUM_POSSIBLE_SCORE_5CARDS 30u
+#endif /* MAXIMUM_POSSIBLE_SCORE_5CARDS */
+
+
+/*
+.. c:function:: extern unsigned short scoreHand(HAND h);
+
+	Compute the total number of points in a given cribbage hand.
+
+	Parameters
+	----------
+	h : ``HAND``
+		The hand of cards itself.
+
+	Returns
+	-------
+	points : ``unsigned short``
+		The total number of points, arising from fifteens, flushes,
+		heels, knobs, pairs, and runs.
+
+	.. seealso::
+
+		In the cribbagehelper/scorehand/src directory:
+
+			- fifteens.h
+			- flush.h
+			- heels.h
+			- knobs.h
+			- pairs.h
+			- runs.h
+			- subsets.h
+*/
+extern unsigned short scoreHand(HAND h);
+
 /*
 .. c:type:: ``SCOREBUNDLE``
 
@@ -87,42 +123,6 @@ extern void freeScoreBundle(SCOREBUNDLE *sb);
 		``0``.
 */
 extern void addScoreCombo(SCOREBUNDLE *sb, HAND *combo, unsigned short nCards);
-
-#if 0
-/*
-.. c:function:: inline unsigned short scoreHand(HAND h);
-
-	Compute the total number of points in a given cribbage hand.
-
-	Parameters
-	----------
-	h : ``HAND``
-		The hand of cards itself.
-
-	Returns
-	-------
-	points : ``unsigned short``
-		The total number of points, arising from fifteens, flushes,
-		heels, knobs, pairs, and runs.
-
-	.. seealso::
-
-		In the cribbagehelper/scorehand/src directory:
-
-			- fifteens.h
-			- flush.h
-			- heels.h
-			- knobs.h
-			- pairs.h
-			- runs.h
-			- subsets.h
-*/
-inline unsigned short scoreHand(HAND h) {
-
-	return fifteens(h) + flush(h) + heels(h) + knobs(h) + pairs(h) + runs(h);
-
-}
-#endif
 
 #ifdef __cplusplus
 }

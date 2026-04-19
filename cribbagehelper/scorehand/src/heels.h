@@ -18,8 +18,8 @@ extern "C" {
 /*
 .. c:function:: extern SCOREBUNDLE *heels(HAND h);
 
-	Determine the number of points in the hand due to heels, which arises
-	when a Jack is turned up when the deck is cut and awards two points.
+	Identify a Jack in the cut card position, which awards two points to
+	the dealer.
 
 	Parameters
 	----------
@@ -29,12 +29,32 @@ extern "C" {
 	Returns
 	-------
 	sb : ``SCOREBUNDLE *``
-		A ``SCOREBUNDLE`` object containing the cut card if it is a Jack.
+		A ``SCOREBUNDLE`` object containing the cut card, if it is a Jack.
 		Empty bundle otherwise.
 
 		.. seealso:: cribbagehelper/scorehand/src/score.h
 */
-extern SCOREBUNDLE *heels(HAND h);
+extern SCOREBUNDLE *findHeels(HAND h);
+
+/*
+.. c:function:: extern unsigned short scoreHeels(SCOREBUNDLE sb);
+
+	Determine the number of points in the hand due to heels.
+
+	Parameters
+	----------
+	sb : ``SCOREBUNDLE``
+		A ``SCOREBUNDLE`` object containing all of the corresponding
+		cut card, as returned by ``heels``.
+
+		.. seealso:: cribbagehelper/scorehand/src/score.h
+
+	Returns
+	-------
+	points : ``unsigned short``
+		2u if a Jack is found in the bundle. 0u otherwise.
+*/
+extern unsigned short scoreHeels(SCOREBUNDLE sb);
 
 #ifdef __cplupslus
 }

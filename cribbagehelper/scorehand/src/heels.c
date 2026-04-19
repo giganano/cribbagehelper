@@ -11,7 +11,7 @@ See documentation of extern functions in heels.h
 #include <stdlib.h>
 #include "heels.h"
 
-extern SCOREBUNDLE *heels(HAND h) {
+extern SCOREBUNDLE *findHeels(HAND h) {
 
 	SCOREBUNDLE *sb = setupScoreBundle();
 	HAND *dummy = setupHand(1u);
@@ -23,6 +23,13 @@ extern SCOREBUNDLE *heels(HAND h) {
 	} else {}
 	free(dummy);
 	return sb;
+
+}
+
+
+extern unsigned short scoreHeels(SCOREBUNDLE sb) {
+
+	return sb.nCombinations == 1 ? 2u : 0u;
 
 }
 
