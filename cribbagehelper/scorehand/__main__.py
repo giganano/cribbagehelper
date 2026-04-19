@@ -31,19 +31,28 @@ points are awarded if the cut card is a Jack (often referred to as "heels," \
 "nibs," or "knibs").""")
 
 	parser.add_argument("-i", "--extra-info", action = "store_true", help = """\
-Prints a breakdown of the sources of all all points earned. Otherwise, only \
+Prints a breakdown of the sources of all points earned. Otherwise, only \
 the total is printed.""")
+
+	parser.add_argument("-j", "--json", action = "store_true", help = """\
+Print the breakdown of all points earned as a JSON output. For use in \
+formatting a user interface.""")
 
 	return parser.parse_args()
 
 if __name__ == "__main__":
 	args = parse_input()
 	h = Hand(*args.cards, crib = args.crib)
-	score = h.score(extra_info = args.extra_info, heels = args.dealer)
-	if args.extra_info:
-		total = sum([score[key] for key in score.keys()])
-		sys.stdout.write("Total points: %d\n" % (total))
+	score = h.score(heels = args.dealer, extra_info = args.extra_info,
+		to_json = args.json)
+	if args.json:
+		sys.stdout.write("%s\n" % (score))
+	elif args.extra_info:
+		sys.stdout.write("Total points: %d\n" % (score["total"]))
 		for key in score.keys():
-			sys.stdout.write(" - from %s: %d\n" % (key, score[key]))
+			if key == "total": continue
+			sys.stdout.write(" - From %s: %d\n" % (key.capitalize(),
+				int(score[key])))
+			if int(score[key]): sys.stdout.write("%s\n" % (str(score[key])))
 	else:
 		sys.stdout.write("%d\n" % (score))

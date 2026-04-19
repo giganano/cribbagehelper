@@ -12,17 +12,18 @@ See documentation of extern functions in runs.h
 #include <stdio.h>
 #include "runs.h"
 #include "subsets.h"
+#include "score.h"
 
 /* static function comment headers not duplicated here for brevity */
 static unsigned short *quicksort(unsigned short *input, unsigned short length);
 static unsigned short consecutive(unsigned short *input, unsigned short length);
 
 
-extern unsigned short runs(HAND h) {
+extern SCOREBUNDLE *runs(HAND h) {
 
-	unsigned short total = 0u;
+	SCOREBUNDLE *sb = setupScoreBundle();
 	unsigned short length = h.nCards;
-	while (length >= 3u && total == 0u) {
+	while (length >= 3u && (*sb).nCombinations == 0u) {
 		/*
 		Start by looking for long runs, then short ones to not "hallucinate",
 		e.g., a run of three that is part of a longer run of four or five.
@@ -43,14 +44,16 @@ extern unsigned short runs(HAND h) {
 			By not stopping the loop and checking all possible combinations of
 			a given length, double and triple runs are naturally caught.
 			*/
-			if (consecutive(sorted, length)) total += length;
+			if (consecutive(sorted, length)) {
+				addScoreCombo(sb, combos[i], length);
+			} else {}
 			freeHand(combos[i]);
 			free(sorted);
 		}
 		free(combos);
 		length--;
 	}
-	return total;
+	return sb;
 
 }
 

@@ -13,9 +13,10 @@ extern "C" {
 
 #include "../../core/card/src/card.h"
 #include "../../core/hand/src/hand.h"
+#include "score.h"
 
 /*
-.. c:function:: extern unsigned short runs(HAND h);
+.. c:function:: extern SCOREBUNDLE *runs(HAND h);
 
 	Compute the number of points in the hand from runs, referring to three
 	cards or more of consecutive rank (e.g., ace-two-three, nine-ten-Jack).
@@ -27,8 +28,12 @@ extern "C" {
 
 	Returns
 	-------
-	points : ``unsigned short``
-		The number of points in the hand from runs alone.
+	sb : ``SCOREBUNDLE *``
+		A ``SCOREBUNDLE`` object containing each of the runs in the hand,
+		determined by finding the longest possible sequences of cards of
+		consecutive rank, requiring at least 3 to award points.
+
+		.. seealso:: cribbagehelper/scorehand/src/score.h
 
 	Notes
 	-----
@@ -38,7 +43,7 @@ extern "C" {
 
 	.. seealso:: cribbagehelper/scorehand/src/pairs.h
 */
-extern unsigned short runs(HAND h);
+extern SCOREBUNDLE *runs(HAND h);
 
 #ifdef __cplupslus
 }

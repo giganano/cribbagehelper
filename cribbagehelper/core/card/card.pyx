@@ -107,7 +107,7 @@ or spades, respectively. Got: %s""" % (identifier[-1]))
 		else: pass
 
 	def __repr__(self):
-		return "<cribbagehelper.card: %s of %s>" % (
+		return "cribbagehelper.Card(%s of %s)" % (
 			self._RANK_TO_NAME_[self.rank].capitalize(),
 			self._SUIT_NAMES_[self.suit].capitalize()
 			)

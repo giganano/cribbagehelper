@@ -10,21 +10,25 @@ See documentation of extern functions in flush.h
 
 #include "flush.h"
 
-extern unsigned short flush(HAND h) {
+extern SCOREBUNDLE *flush(HAND h) {
+
+	SCOREBUNDLE *sb = setupScoreBundle();
 
 	unsigned short suitsMatch = 1u;
-	for (unsigned short i = 1u; i <= h.nCards - 1u; i++) {
+	for (unsigned short i = 1u; i < h.nCards - 1u; i++) {
 		suitsMatch &= (*h.cards[i]).suit == (*h.cards[0]).suit;
 	}
-	if (suitsMatch && h.isCrib) {
-		return ((*h.cards[h.nCards - 1u]).suit == (*h.cards[0]).suit) * h.nCards;
-	} else if (suitsMatch) {
-		return h.nCards - 1u + (
-			(*h.cards[h.nCards - 1u]).suit == (*h.cards[0]).suit
-			);
-	} else {
-		return 0u;
-	}
+
+	if (suitsMatch) {
+		suitsMatch &= (*h.cards[h.nCards - 1u]).suit == (*h.cards[0]).suit;
+		if (suitsMatch) {
+			addScoreCombo(sb, &h, h.nCards);
+		} else if (!h.isCrib) {
+			addScoreCombo(sb, &h, h.nCards - 1u);
+		}
+	} else {}
+
+	return sb;
 
 }
 

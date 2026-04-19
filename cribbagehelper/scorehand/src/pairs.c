@@ -12,19 +12,19 @@ See documentation of extern functions in pairs.h
 #include "pairs.h"
 #include "subsets.h"
 
-extern unsigned short pairs(HAND h) {
+extern SCOREBUNDLE *pairs(HAND h) {
 
-	unsigned short total = 0u;
+	SCOREBUNDLE *sb = setupScoreBundle();
 	HAND **twoCardCombos = subsets(h, 2u);
 	for (unsigned long i = 0ul; i < choose(h.nCards, 2ul); i++) {
-		total += 2u * (
-			(*(*twoCardCombos[i]).cards[1]).rank ==
-			(*(*twoCardCombos[i]).cards[0]).rank
-			);
+		if ((*(*twoCardCombos[i]).cards[1]).rank ==
+			(*(*twoCardCombos[i]).cards[0]).rank) {
+			addScoreCombo(sb, twoCardCombos[i], 2u);
+		} else {}
 		freeHand(twoCardCombos[i]);
 	}
 	free(twoCardCombos);
-	return total;
+	return sb;
 
 }
 

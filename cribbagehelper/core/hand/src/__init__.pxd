@@ -3,7 +3,7 @@
 # License: MIT License. See LICENSE under top-level directory
 # at: https://github.com/giganano/cribbagehelper.git
 
-from ...card cimport Card, CARD
+from ...card cimport CARD
 
 cdef extern from "./hand.h":
 	ctypedef struct HAND:
